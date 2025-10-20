@@ -30,7 +30,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate birth;
 
     @Column(nullable = false, unique = true, length = 50)
