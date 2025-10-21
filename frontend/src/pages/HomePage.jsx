@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { userService } from "../services/userService";
 import TravelPlanForm from "../components/Travel/TravelPlanForm";
 import TravelPlanList from "../components/Travel/TravelPlanList";
@@ -44,6 +44,15 @@ export default function HomePage() {
         >
           로그아웃
         </button>
+      </div>
+
+      <div>
+        <Link
+          to="/startpage"
+          className="text-blue-400 hover:underline text-3xl"
+        >
+          여행 시작하기
+        </Link>
       </div>
 
       {/* 여행 계획 폼 섹션 */}
