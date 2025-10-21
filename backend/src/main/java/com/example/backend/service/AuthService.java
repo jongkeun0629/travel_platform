@@ -1,9 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.AuthRequest;
-import com.example.backend.dto.AuthResponse;
-import com.example.backend.dto.RegisterRequest;
-import com.example.backend.dto.UserDto;
+import com.example.backend.dto.*;
 import com.example.backend.entity.Provider;
 import com.example.backend.entity.User;
 import com.example.backend.repository.UserRepository;
@@ -11,6 +8,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 //import com.example.backend.config.PasswordConfig;
 
 
@@ -63,5 +62,24 @@ public class AuthService {
                 .refreshToken(refreshToken)
                 .user(UserDto.fromEntity(user))
                 .build();
+    }
+    public AuthResponse refreshToken(RefreshTokenRequest request){
+        final String refreshToken = request.getRefreshToken();
+        System.out.println(("리프레시토큰 받기 성공"));
+        final String username = jwtService.extractUsername(refreshToken);
+        System.out.println(("userEmail = "+username));
+
+
+        if(username != null){
+            var user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("사용자 찾을 수 없음"));
+            if (jwtService.isTokenValid(refreshToken, user)) {
+                String newAccessToken = jwtService.generateToken(user);
+                return AuthResponse.builder()
+                        .accessToken(newAccessToken)
+                        .refreshToken(refreshToken)
+                        .build();
+            }
+        }
+        throw new IllegalArgumentException("Refresh Token is not valid");
     }
 }

@@ -69,4 +69,25 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String identifier = extractUsername(token);
+
+        if(userDetails instanceof User user){
+            boolean isValid = identifier.equals(String.valueOf(user.getId())) || identifier.equals(user.getUsername());
+            return isValid && !isTokenExpired(token);
+        }
+        return identifier.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+    private Date extractExpiration(String token) { return extractClaim(token, Claims::getExpiration); }
+
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+    public String extractUsername(String token) {Claims claims = extractAllClaims(token);
+
+        if (claims.containsKey("id")) {
+            return String.valueOf(claims.get("id"));
+        }
+    return claims.getSubject();
+    }
 }
