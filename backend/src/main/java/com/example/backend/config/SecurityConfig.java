@@ -27,7 +27,6 @@ public class SecurityConfig {
                                         "/h2-console/**"
                                 ).permitAll()
                                 .anyRequest().authenticated()
-
                 )
 //                .oauth2Login(oauth2 -> oauth2
 //                        .successHandler(oAuth2SuccessHandler)
