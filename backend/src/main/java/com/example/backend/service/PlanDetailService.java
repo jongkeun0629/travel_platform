@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.PlaceRequest;
 import com.example.backend.dto.PlanDetailRequest;
 import com.example.backend.entity.Place;
 import com.example.backend.entity.Plan;
@@ -47,21 +48,25 @@ public class PlanDetailService {
         PlanDetail planDetail = planDetailRepository.findById(detailId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 계획 상세를 찾을 수 없습니다."));
 
-        Place place;
+        Place place = null;
         if (request.getPlaceId() != null) {
             place = placeRepository.findById(request.getPlaceId())
                     .orElseThrow(() -> new IllegalArgumentException("해당 장소를 찾을 수 없습니다."));
-        } else {
+        } else if (request.getPlace() != null) {
+            PlaceRequest placeReq = request.getPlace();
             place = Place.builder()
-                    .name(request.getPlaceName())
-                    .address(request.getAddress())
-                    .call(request.getCall())
-                    .classification(request.getClassification())
+                    .placeName(placeReq.getPlcaeName())
+                    .address(placeReq.getAddress())
+                    .call(placeReq.getCall())
+                    .classification(placeReq.getClassification())
                     .build();
             placeRepository.save(place);
         }
 
-        planDetail.setPlace(place);
+        if (place != null) {
+            planDetail.setPlace(place);
+        }
+
         planDetail.setDay(request.getDay());
         planDetail.setReserveInfo(request.getReserveInfo());
         planDetail.setPlaceType(request.getPlaceType());
@@ -70,6 +75,7 @@ public class PlanDetailService {
 
         return planDetailRepository.save(planDetail);
     }
+
 
     public void deletePlanDetail(Long detailId) {
         PlanDetail planDetail = planDetailRepository.findById(detailId)
