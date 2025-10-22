@@ -29,18 +29,19 @@ spring:
             scope:
               - email
               - profile
-#          apple:
-#            client-id:
-#            client-secret:
-#          kakao:
-#            client-id:
-#            client-secret:
+  #          apple:
+  #            client-id:
+  #            client-secret:
+  #          kakao:
+  #            client-id:
+  #            client-secret:
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
   server:
     port: 8080
+
 jwt:
   secret: "23bLwsCSUZf7Lw29r8PVpwOxTcHiTwp7l4EpEJuqBvg="
   expiration: 86400000
