@@ -3,23 +3,26 @@ import { useNavigate, Link } from "react-router-dom";
 import { userService } from "../services/userService";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // 아이디 또는 이메일
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("이메일과 비밀번호를 입력해주세요.");
+    setError("");
+
+    if (!identifier || !password) {
+      setError("아이디 또는 이메일, 비밀번호를 입력해주세요.");
       return;
     }
 
     try {
-      userService.login(email, password);
+      userService.login({ identifier, password });
+      alert("로그인 성공!");
       navigate("/", { replace: true });
-    } catch (e) {
-      setError("로그인에 실패했습니다.");
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -32,14 +35,14 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-400">
-              이메일
+              아이디 또는 이메일
             </label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoComplete="email"
+              placeholder="아이디 또는 이메일을 입력하세요"
             />
           </div>
           <div>
@@ -51,7 +54,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoComplete="current-password"
+              placeholder="비밀번호를 입력하세요"
             />
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}

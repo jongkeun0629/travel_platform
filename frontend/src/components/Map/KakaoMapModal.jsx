@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-export default function KakaoMapModal({ fieldName, onSelect, onClose }) {
+export default function KakaoMapModal({ onSelect, onClose }) {
   const [keyword, setKeyword] = useState("");
   const [results, setResults] = useState([]);
 
@@ -25,9 +25,7 @@ export default function KakaoMapModal({ fieldName, onSelect, onClose }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-gray-900 p-4 rounded-lg w-11/12 max-w-xl">
-        <h3 className="text-lg font-semibold mb-2 text-gray-100">
-          {fieldName} 검색
-        </h3>
+        <h3 className="text-lg font-semibold mb-4 text-gray-100">장소 검색</h3>
         <input
           type="text"
           value={keyword}
@@ -44,6 +42,7 @@ export default function KakaoMapModal({ fieldName, onSelect, onClose }) {
                 onSelect({
                   address: place.address_name || place.road_address_name,
                   phone: place.phone || "",
+                  place_name: place.place_name,
                 })
               }
             >
@@ -58,12 +57,14 @@ export default function KakaoMapModal({ fieldName, onSelect, onClose }) {
             </p>
           )}
         </div>
-        <button
-          onClick={onClose}
-          className="mt-3 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white"
-        >
-          닫기
-        </button>
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="mt-3 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white"
+          >
+            닫기
+          </button>
+        </div>
       </div>
     </div>
   );

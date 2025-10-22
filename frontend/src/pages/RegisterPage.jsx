@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { userService } from "../services/userService";
 
 export default function RegisterPage() {
+  const [userId, setUserId] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -10,16 +11,19 @@ export default function RegisterPage() {
 
   const handleRegister = (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("이메일과 비밀번호를 입력해주세요.");
+    setError("");
+
+    if (!userId || !email || !password) {
+      setError("아이디, 이메일, 비밀번호를 모두 입력해주세요.");
       return;
     }
 
     try {
-      userService.register({ email, password });
+      userService.register({ userId, email, password });
+      alert("회원가입이 완료되었습니다!");
       navigate("/login");
-    } catch (e) {
-      setError("로그인에 실패했습니다.");
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -32,6 +36,18 @@ export default function RegisterPage() {
         <form onSubmit={handleRegister} className="space-y-5">
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-400">
+              아이디
+            </label>
+            <input
+              type="text"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="아이디를 입력하세요"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-400">
               이메일
             </label>
             <input
@@ -39,7 +55,7 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoComplete="email"
+              placeholder="이메일을 입력하세요"
             />
           </div>
           <div>
@@ -51,7 +67,7 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoComplete="current-password"
+              placeholder="비밀번호를 입력하세요"
             />
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -64,7 +80,7 @@ export default function RegisterPage() {
         </form>
         <div className="mt-6 text-center">
           <Link to="/login" className="text-blue-400 hover:underline">
-            뒤로
+            로그인하기
           </Link>
         </div>
       </div>

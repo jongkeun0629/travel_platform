@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import KakaoMapModal from "../components/Map/KakaoMapModal";
 
 const fetchTravelDetail = async (id) => {
@@ -9,7 +9,6 @@ const fetchTravelDetail = async (id) => {
         id,
         title: "2025 제주 여행",
         user: "홍길동",
-        duration: "2025-10-23 ~ 2025-10-25",
         reservations: [],
         checklist: [
           "교통편",
@@ -52,9 +51,13 @@ export default function TravelDetail() {
   const [reservationType, setReservationType] = useState("교통");
   const [newReservation, setNewReservation] = useState({});
 
+  const location = useLocation();
+  const { travelTitle, selectedCities, travelPeriod, author } =
+    location.state || {};
+
   // 모달
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalField, setModalField] = useState(""); // 주소 / 전화 선택
+  const [modalField, setModalField] = useState("");
 
   // 예약 input 클릭 시 모달 열기
   const handleOpenModal = (field) => {
@@ -63,11 +66,25 @@ export default function TravelDetail() {
   };
 
   // 모달에서 선택 시
-  const handleSelectPlace = ({ address, phone }) => {
-    setNewReservation((prev) => ({
-      ...prev,
-      [modalField]: modalField.includes("주소") ? address : phone,
-    }));
+  const handleSelectPlace = ({ address, phone, place_name }) => {
+    if (modalField === "place") {
+      // 일정 메뉴에서 장소 선택
+      setNewPlan((prev) => ({
+        ...prev,
+        place: place_name,
+      }));
+    } else {
+      setNewReservation((prev) => {
+        const field = modalField;
+        let value = "";
+
+        if (field.includes("주소")) value = address;
+        else if (field.includes("전화")) value = phone;
+        else value = place_name; // 출발지, 숙소이름, 식당이름 등
+
+        return { ...prev, [field]: value };
+      });
+    }
     setModalOpen(false);
   };
 
@@ -211,9 +228,19 @@ export default function TravelDetail() {
         return (
           <div>
             <h2 className="text-3xl font-bold mb-4">🧭 여행 정보</h2>
-            <p className="text-xl mb-2">제목: {travelData.title}</p>
-            <p className="text-lg text-gray-400">
-              작성자: {travelData.user} | 기간: {travelData.duration}
+            <p className="mb-2 text-lg">작성자: {author}</p>
+            <p className="mb-2 text-lg">
+              여행 도시: {selectedCities && selectedCities.join(", ")}
+            </p>
+            <p className="mb-6 text-lg">
+              여행 기간:{" "}
+              {travelPeriod
+                ? `${new Date(
+                    travelPeriod.startDate
+                  ).toLocaleDateString()} ~ ${new Date(
+                    travelPeriod.endDate
+                  ).toLocaleDateString()}`
+                : "미정"}
             </p>
           </div>
         );
@@ -295,14 +322,14 @@ export default function TravelDetail() {
                     onChange={(e) =>
                       setNewPlan({ ...newPlan, place: e.target.value })
                     }
-                    className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
+                    className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full mr-2"
                   />
-                  {/* <button
-                    onClick={() => handleOpenModal()}
+                  <button
+                    onClick={() => handleOpenModal("place")}
                     className="bg-blue-600  cursor-pointer hover:bg-blue-700 px-3 py-2 rounded-lg text-white w-20"
                   >
                     검색
-                  </button> */}
+                  </button>
                 </div>
               </div>
 
@@ -319,12 +346,14 @@ export default function TravelDetail() {
               </div>
             </div>
 
-            <button
-              onClick={handleAddPlan}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mb-6"
-            >
-              일정 추가
-            </button>
+            <div className="flex justify-center">
+              <button
+                onClick={handleAddPlan}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mb-6"
+              >
+                일정 추가
+              </button>
+            </div>
 
             {travelData.itinerary.map((p, index) => (
               <div
@@ -341,7 +370,7 @@ export default function TravelDetail() {
                       onClick={() => openKakaoMap(p.place)}
                       className="text-blue-400 hover:underline"
                     >
-                      📍 {p.place} (길찾기)
+                      📍 {p.place}
                     </button>
                   )}
                 </div>
@@ -382,7 +411,12 @@ export default function TravelDetail() {
               {fields.map((f) => {
                 const type = getInputType(f);
                 const isAddressOrPhone =
-                  f.includes("주소") || f.includes("전화");
+                  f.includes("주소") ||
+                  f.includes("전화") ||
+                  f === "출발지" ||
+                  f === "도착지" ||
+                  f === "숙소이름" ||
+                  f === "식당이름";
                 return (
                   <div key={f} className="flex gap-2 mb-2">
                     <input
@@ -410,12 +444,14 @@ export default function TravelDetail() {
               })}
             </div>
 
-            <button
-              onClick={handleAddReservation}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mb-6"
-            >
-              예약 추가
-            </button>
+            <div className="flex justify-center">
+              <button
+                onClick={handleAddReservation}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mb-6"
+              >
+                예약 추가
+              </button>
+            </div>
 
             {travelData.reservations.map((res, index) => (
               <div
@@ -453,7 +489,7 @@ export default function TravelDetail() {
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
       {/* 헤더 */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl font-bold">{travelData.title}</h1>
+        <h1 className="text-4xl font-bold">{travelTitle}</h1>
         <Link to="/">
           <button className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-lg">
             홈으로
@@ -490,7 +526,6 @@ export default function TravelDetail() {
       {/* 모달 출력 */}
       {modalOpen && (
         <KakaoMapModal
-          fieldName={modalField}
           onSelect={handleSelectPlace}
           onClose={() => setModalOpen(false)}
         />

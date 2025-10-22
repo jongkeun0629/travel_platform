@@ -47,11 +47,15 @@ export default function CreatePlan() {
         .filter((c) => selectedCities.includes(c.id))
         .map((c) => c.name);
 
+      const user = JSON.parse(localStorage.getItem("currentUser"));
+      const username = user?.userId; // user가 null일 수도 있으니 optional chaining 사용
+
       navigate("/traveldetail", {
         state: {
           travelTitle,
           selectedCities: selectedCityNames,
           travelPeriod: { startDate, endDate },
+          author: username,
         },
       });
     } else {
