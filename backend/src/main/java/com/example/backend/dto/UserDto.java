@@ -15,7 +15,6 @@ public class UserDto {
     private Long id;
     private String username;
     private String email;
-//    private String fullName;
     private String introduction;
     private String profileImageUrl;
     private Provider provider;
@@ -25,7 +24,6 @@ public class UserDto {
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
-//                .fullName(user.getFullName())
                 .introduction(user.getIntroduction())
                 .profileImageUrl(user.getProfileImageUrl())
                 .provider(user.getProvider())

@@ -8,10 +8,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "users", indexes = {
@@ -23,7 +25,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements UserDetails {
+public class User implements UserDetails, OAuth2User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,13 +52,27 @@ public class User implements UserDetails {
     @Column(length = 255)
     private String profileImageUrl;
 
-    private Long providerId;
+    private String providerId;
 
     @CreationTimestamp
     private LocalDate createdAt;
 
     @UpdateTimestamp
     private LocalDate updatedAt;
+
+    @Transient // JPA가 DB 컬럼으로 매핑하지 않도록 합니다.
+    private Map<String, Object> attributes;
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        // 소셜 서비스에서 받은 원본 속성을 반환
+        // 보통 CustomOAuth2UserService에서 받은 attributes를 저장해뒀다가 반환합니다.
+        // 또는 Map.of("id", this.id, "email", this.email, ...) 형태로 반환할 수도 있습니다.
+        return this.attributes;
+    }
+
+    @Override
+    public String getName() { return String.valueOf(this.attributes.get("sub")); } // 사용자 식별자(보통 id나 sub) 반환
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
