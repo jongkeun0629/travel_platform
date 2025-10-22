@@ -91,7 +91,7 @@ export default function CreatePlan() {
         <input
           type="text"
           id="travelTitle"
-          placeholder="예: 유럽 배낭여행 2025"
+          placeholder="예: 2025 제주 한 달 살기"
           value={travelTitle}
           onChange={(e) => setTravelTitle(e.target.value)}
           className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
