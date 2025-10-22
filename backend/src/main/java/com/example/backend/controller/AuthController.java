@@ -30,10 +30,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody AuthRequest request
-    ){
+    ) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
+
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(
             @Valid @RequestBody RefreshTokenRequest request
@@ -44,19 +45,19 @@ public class AuthController {
 
     @PostMapping("/send-verification-email")
     public ResponseEntity<CodeRequest> sendVerificationCode(@RequestBody CodeRequest request
-){
-    emailService.sendCode(request.getEmail());
-    return ResponseEntity.ok().build();
+    ) {
+        emailService.sendCode(request.getEmail());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(
             @Valid @RequestBody CodeRequest request
-    ){
-        boolean verified = emailService.verifyCode(request.getEmail(),request.getCode());
-        if(verified){
+    ) {
+        boolean verified = emailService.verifyCode(request.getEmail(), request.getCode());
+        if (verified) {
             return ResponseEntity.ok().body("이메일 인증이 완료되었습니다.");
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 코드가 유효하지 않거나 만료되었습니다.");
         }
     }

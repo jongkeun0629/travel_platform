@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+<<<<<<< HEAD
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +15,8 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+=======
+>>>>>>> origin/develop
 
 import java.time.LocalDate;
 
@@ -27,7 +30,11 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+<<<<<<< HEAD
 public class User implements UserDetails, OAuth2User {
+=======
+public class User {
+>>>>>>> origin/develop
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +46,11 @@ public class User implements UserDetails, OAuth2User {
     @Column(nullable = false)
     private String password;
 
+<<<<<<< HEAD
     @Column(nullable = true)
+=======
+    @Column(nullable = false)
+>>>>>>> origin/develop
     private LocalDate birth;
 
     @Column(nullable = false, unique = true, length = 50)
@@ -48,19 +59,29 @@ public class User implements UserDetails, OAuth2User {
     @Column(length = 255)
     private String introduction;
 
+<<<<<<< HEAD
     @Enumerated(EnumType.STRING)
     private Provider provider;  // google, kakao, naver 등
+=======
+    @Column(length = 50)
+    private String provider;  // google, kakao, naver 등
+>>>>>>> origin/develop
 
     @Column(length = 255)
     private String profileImageUrl;
 
+<<<<<<< HEAD
     private String providerId;
+=======
+    private Long providerId;
+>>>>>>> origin/develop
 
     @CreationTimestamp
     private LocalDate createdAt;
 
     @UpdateTimestamp
     private LocalDate updatedAt;
+<<<<<<< HEAD
 
     @Transient // JPA가 DB 컬럼으로 매핑하지 않도록 합니다.
     private Map<String, Object> attributes;
@@ -80,4 +101,6 @@ public class User implements UserDetails, OAuth2User {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
+=======
+>>>>>>> origin/develop
 }

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb_jw
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -29,12 +29,6 @@ spring:
             scope:
               - email
               - profile
-  #          apple:
-  #            client-id:
-  #            client-secret:
-  #          kakao:
-  #            client-id:
-  #            client-secret:
   jpa:
     hibernate:
       ddl-auto: update

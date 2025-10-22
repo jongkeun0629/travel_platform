@@ -6,6 +6,7 @@ import lombok.Data;
 public class PlanDetailRequest {
     private Long planId;
     private Long placeId;
+    private PlaceRequest place;
     private String day;
     private String reserveInfo;
     private String placeType;
