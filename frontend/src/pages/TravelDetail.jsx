@@ -349,7 +349,7 @@ export default function TravelDetail() {
             <div className="flex justify-center">
               <button
                 onClick={handleAddPlan}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mb-6"
+                className="bg-blue-600 hover:bg-blue-700 hover:cursor-pointer text-white px-6 py-2 rounded-lg text-lg font-semibold mb-6"
               >
                 일정 추가
               </button>
@@ -365,21 +365,23 @@ export default function TravelDetail() {
                     {p.date} {p.time}
                   </p>
                   <p>{p.content}</p>
+                </div>
+                <div>
                   {p.place && (
                     <button
                       onClick={() => openKakaoMap(p.place)}
-                      className="text-blue-400 hover:underline"
+                      className="text-blue-400 hover:underline hover:cursor-pointer mr-5"
                     >
                       📍 {p.place}
                     </button>
                   )}
+                  <button
+                    onClick={() => handleRemovePlan(index)}
+                    className="text-red-400 hover:text-red-500 hover:cursor-pointer text-xl"
+                  >
+                    ✕
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleRemovePlan(index)}
-                  className="text-red-400 hover:text-red-500 text-xl"
-                >
-                  ✕
-                </button>
               </div>
             ))}
           </div>
@@ -447,7 +449,7 @@ export default function TravelDetail() {
             <div className="flex justify-center">
               <button
                 onClick={handleAddReservation}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mb-6"
+                className="bg-blue-600 hover:bg-blue-700 hover:cursor-pointer text-white px-6 py-2 rounded-lg text-lg font-semibold mb-6"
               >
                 예약 추가
               </button>
@@ -471,7 +473,7 @@ export default function TravelDetail() {
                 </div>
                 <button
                   onClick={() => handleRemoveReservation(index)}
-                  className="text-red-400 hover:text-red-500 text-xl"
+                  className="text-red-400 hover:text-red-500 hover:cursor-pointer text-xl"
                 >
                   ✕
                 </button>
