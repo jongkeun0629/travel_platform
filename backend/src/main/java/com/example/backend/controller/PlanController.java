@@ -19,11 +19,23 @@ public class PlanController {
     public ResponseEntity<PlanResponse> createPlan(
             @RequestBody PlanRequest request,
             @RequestParam Long userId
-            ) {
+    ) {
         Plan createdPlan = planService.createPlan(request, userId);
         return ResponseEntity.ok(PlanResponse.fromEntity(createdPlan));
     }
 
     @PutMapping("/{planId}")
-    public
+    public ResponseEntity<PlanResponse> updatePlan(
+            @PathVariable Long planId,
+            @RequestBody PlanRequest request
+    ) {
+        Plan updatedPlan = planService.updatedPlan(planId, request);
+        return ResponseEntity.ok(PlanResponse.fromEntity(updatedPlan));
+    }
+
+    @DeleteMapping("/{planId}")
+    public ResponseEntity<Void> deletePlan(@PathVariable Long planId) {
+        planService.deletePlan(planId);
+        return ResponseEntity.noContent().build();
+    }
 }
