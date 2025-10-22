@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb_jw
+    url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -20,15 +20,15 @@ spring:
           starttls:
             enable: true
   security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: "${google-client-id}"
-            client-secret: "${google-secret}"
-            scope:
-              - email
-              - profile
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id: "${google-client-id}"
+#            client-secret: "${google-secret}"
+#            scope:
+#              - email
+#              - profile
   jpa:
     hibernate:
       ddl-auto: update

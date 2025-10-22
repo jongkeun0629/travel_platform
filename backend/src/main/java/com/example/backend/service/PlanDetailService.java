@@ -34,7 +34,7 @@ public class PlanDetailService {
         PlanDetail planDetail = PlanDetail.builder()
                 .plan(plan)
                 .place(place)
-                .day(request.getDay())
+                .tripday(request.getTripday())
                 .reserveInfo(request.getReserveInfo())
                 .placeType(request.getPlaceType())
                 .details(request.getDetails())
@@ -67,7 +67,7 @@ public class PlanDetailService {
             planDetail.setPlace(place);
         }
 
-        planDetail.setDay(request.getDay());
+        planDetail.setTripday(request.getTripday());
         planDetail.setReserveInfo(request.getReserveInfo());
         planDetail.setPlaceType(request.getPlaceType());
         planDetail.setDetails(request.getDetails());
