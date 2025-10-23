@@ -59,7 +59,7 @@ public class ItemService {
             itemRepository.deleteById(id);
         }
     }
-    @Transactional()
+    @Transactional
     public List<ItemResponse> get(Long planId) {
         List<Item> items = itemRepository.findAllByPlanPlanId(planId);
 
@@ -67,4 +67,14 @@ public class ItemService {
                 .map(ItemResponse::fromEntity)
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public void toggleCheck(Long planId, Long id){
+        Item item = itemRepository.findById(id).get();
+        if(item.getPlan().getPlanId().equals(planId)) {
+            item.setChecked(true);
+        }
+        itemRepository.save(item);
+    }
+
 }

@@ -5,6 +5,7 @@ import com.example.backend.dto.ItemResponse;
 import com.example.backend.entity.Item;
 import com.example.backend.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,5 +34,10 @@ public class ItemController {
         List<ItemResponse> responseList = itemService.get(planId);
 
         return ResponseEntity.ok(responseList);
+    }
+    @PatchMapping("/{itemId}")
+    public ResponseEntity<String> toggleCheck(@PathVariable Long planId, @PathVariable Long itemId){
+        itemService.toggleCheck(planId, itemId);
+        return ResponseEntity.status(201).body("check toggled successfully.");
     }
 }
