@@ -6,6 +6,7 @@ import CreatePlan from "./pages/CreatePlan";
 import RegisterPage from "./pages/RegisterPage";
 import NotFound from "./pages/NotFound";
 import TravelDetail from "./pages/TravelDetail";
+import ProfilePage from "./pages/ProfilePage";
 
 export default function App() {
   return (
@@ -18,9 +19,11 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/startpage" element={<StartPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/createplan" element={<CreatePlan />} />
             <Route path="/" element={<HomePage />} />
-            <Route path={"/traveldetail/:id"} element={<TravelDetail />} />
+            {/* /travel/:id */}
+            <Route path="/traveldetail" element={<TravelDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
