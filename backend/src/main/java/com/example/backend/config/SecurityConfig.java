@@ -28,7 +28,8 @@ public class SecurityConfig {
                                         "/h2-console/**",
                                         "/api/plans/**",
                                         "/api/places/**",
-                                        "api/plan-details/**"
+                                        "api/plan-details/**",
+                                        "api/user/**"
                                 ).permitAll()
                                 .anyRequest().authenticated()
                 )
