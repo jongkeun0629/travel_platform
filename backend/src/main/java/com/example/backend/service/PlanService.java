@@ -42,7 +42,6 @@ public class PlanService {
                 .updatedAt(LocalDateTime.now())
                 .build();
         System.out.println("plan builded");
-        itemService.InitialItem(plan);
         return planRepository.save(plan);
     }
 
