@@ -22,8 +22,7 @@ export default function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/createplan" element={<CreatePlan />} />
             <Route path="/" element={<HomePage />} />
-            {/* /travel/:id */}
-            <Route path="/traveldetail" element={<TravelDetail />} />
+            <Route path="/traveldetail/:id" element={<TravelDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

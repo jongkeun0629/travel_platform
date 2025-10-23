@@ -81,18 +81,18 @@ export default function TravelDetail() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalField, setModalField] = useState("");
 
-  // 저장 유틸: plan 과 travelData를 합쳐 localStorage에 덮어쓰기 (중복 추가 방지)
+  /* ------------------------------
+      저장/업데이트 유틸 함수
+  ------------------------------ */
   const saveToLocalStorage = (updatedPlan) => {
     const savedPlans = JSON.parse(localStorage.getItem("travelPlans") || "[]");
     const filtered = savedPlans.filter(
       (p) => Number(p.id) !== Number(updatedPlan.id)
     );
-    // 최신 항목을 배열 끝에 넣기
     const newArr = [...filtered, updatedPlan];
     localStorage.setItem("travelPlans", JSON.stringify(newArr));
   };
 
-  // plan 업데이트 + travelData 동기화 + 저장을 하나의 함수로 통일
   const updateAndSave = (updatedTravelData) => {
     const updatedPlan = {
       ...(plan || {}),
@@ -104,19 +104,29 @@ export default function TravelDetail() {
     saveToLocalStorage(updatedPlan);
   };
 
-  // 초기 로드: location.state 있으면 새로 생성된 여행으로 처리하고 localStorage에 저장,
-  // 없으면 localStorage에서 id로 찾아서 불러옴.
+  // 여행 기본 정보 수정 핸들러
+  const handleUpdateInfo = (field, value) => {
+    const updatedPlan = { ...plan, [field]: value };
+    setPlan(updatedPlan);
+    saveToLocalStorage(updatedPlan);
+  };
+
+  /* ------------------------------
+      초기 로드
+  ------------------------------ */
   useEffect(() => {
     const savedPlans = JSON.parse(localStorage.getItem("travelPlans") || "[]");
 
     if (location.state && location.state.id) {
-      // CreatePlan에서 navigate로 전달된 state (새로 만든 여행)
+      // 새 여행 생성 시 (CreatePlan에서 넘어온 경우)
       const newPlan = {
         id: location.state.id,
         travelTitle: location.state.travelTitle,
         selectedCities: location.state.selectedCities || [],
         travelPeriod: location.state.travelPeriod,
         author: location.state.author,
+        travelType: location.state.travelType || "일반 여행",
+        visibility: location.state.visibility || "전체 공개",
         travelData: location.state.travelData || {
           checklist: ["교통편", "숙소", "세면도구", "의류", "충전기"],
           itinerary: [],
@@ -125,44 +135,21 @@ export default function TravelDetail() {
       };
       setPlan(newPlan);
       setTravelData(newPlan.travelData);
-      saveToLocalStorage(newPlan); // 한 번만 저장
+      saveToLocalStorage(newPlan);
     } else {
-      // 기존 여행 불러오기 (홈에서 보기 클릭)
+      // 기존 여행 불러오기
       const existing = savedPlans.find((p) => Number(p.id) === Number(id));
       if (existing) {
         setPlan(existing);
-        setTravelData(
-          existing.travelData || {
-            checklist: ["교통편", "숙소", "세면도구", "의류", "충전기"],
-            itinerary: [],
-            reservations: [],
-          }
-        );
-      } else {
-        // id로도 찾을 수 없는 경우: 빈 플랜 생성
-        setPlan({
-          id,
-          travelTitle: "알 수 없는 여행",
-          selectedCities: [],
-          travelPeriod: null,
-          author: null,
-          travelData: {
-            checklist: ["교통편", "숙소", "세면도구", "의류", "충전기"],
-            itinerary: [],
-            reservations: [],
-          },
-        });
-        setTravelData({
-          checklist: ["교통편", "숙소", "세면도구", "의류", "충전기"],
-          itinerary: [],
-          reservations: [],
-        });
+        setTravelData(existing.travelData);
       }
     }
     setLoading(false);
   }, [id]);
 
-  // 카카오맵 모달/검색 관련
+  /* ------------------------------
+      핸들러 모음
+  ------------------------------ */
   const handleOpenModal = (field) => {
     setModalField(field);
     setModalOpen(true);
@@ -186,60 +173,32 @@ export default function TravelDetail() {
     setModalOpen(false);
   };
 
-  // 카카오 주소 검색(간단)
-  const openKakaoAddressSearch = (fieldName) => {
-    if (!window.kakao || !window.kakao.maps) {
-      alert("카카오맵 SDK가 로드되지 않았습니다.");
-      return;
-    }
-    const ps = new window.kakao.maps.services.Places();
-    const keyword = prompt("검색할 장소를 입력하세요:");
-    if (!keyword) return;
-    ps.keywordSearch(keyword, (data, status) => {
-      if (status === window.kakao.maps.services.Status.OK) {
-        const place = data[0];
-        const address = place.address_name || place.road_address_name;
-        const phone = place.phone || "";
-        setNewReservation((prev) => ({
-          ...prev,
-          ...(fieldName.includes("주소") ? { [fieldName]: address } : {}),
-          ...(fieldName.includes("전화") ? { [fieldName]: phone } : {}),
-        }));
-        alert(`📍 ${place.place_name}\n주소: ${address}\n전화번호: ${phone}`);
-      } else {
-        alert("검색 결과를 찾을 수 없습니다.");
-      }
-    });
-  };
-
   const openKakaoMap = (place) => {
     const url = `https://map.kakao.com/?q=${encodeURIComponent(place)}`;
     window.open(url, "_blank");
   };
 
-  // 핸들러들 (모두 const로 정리, updateAndSave 사용)
   const handleAddChecklist = () => {
-    const text = newChecklist?.trim();
-    if (!text) return;
+    if (!newChecklist.trim()) return;
     const updated = {
       ...travelData,
-      checklist: [...(travelData.checklist || []), text],
+      checklist: [...(travelData.checklist || []), newChecklist.trim()],
     };
     updateAndSave(updated);
     setNewChecklist("");
   };
 
-  const handleRemoveChecklist = (index) => {
+  const handleRemoveChecklist = (i) => {
     const updated = {
       ...travelData,
-      checklist: (travelData.checklist || []).filter((_, i) => i !== index),
+      checklist: travelData.checklist.filter((_, idx) => idx !== i),
     };
     updateAndSave(updated);
   };
 
   const handleAddPlan = () => {
     if (!newPlan.date || !newPlan.time || !newPlan.content) {
-      alert("날짜, 시간, 내용을 모두 입력해 주세요.");
+      alert("날짜, 시간, 내용을 모두 입력하세요.");
       return;
     }
     const updated = {
@@ -250,24 +209,22 @@ export default function TravelDetail() {
     setNewPlan({ date: "", time: "", place: "", content: "" });
   };
 
-  const handleRemovePlan = (index) => {
+  const handleRemovePlan = (i) => {
     const updated = {
       ...travelData,
-      itinerary: (travelData.itinerary || []).filter((_, i) => i !== index),
+      itinerary: travelData.itinerary.filter((_, idx) => idx !== i),
     };
     updateAndSave(updated);
   };
 
   const handleAddReservation = () => {
     const fields = getReservationFields(reservationType);
-    // required check: (간단히) 필드가 비어있지 않은지 확인
-    const missing = fields.some((f) => {
-      if (f === "메모") return false; // 메모는 선택
-      const val = newReservation[f];
-      return !val || String(val).trim() === "";
-    });
+    const missing = fields.some(
+      (f) =>
+        f !== "메모" && (!newReservation[f] || newReservation[f].trim() === "")
+    );
     if (missing) {
-      alert("예약의 필수 항목을 모두 입력해 주세요.");
+      alert("필수 항목을 모두 입력하세요.");
       return;
     }
     const updated = {
@@ -281,40 +238,35 @@ export default function TravelDetail() {
     setNewReservation({});
   };
 
-  const handleRemoveReservation = (index) => {
+  const handleRemoveReservation = (i) => {
     const updated = {
       ...travelData,
-      reservations: (travelData.reservations || []).filter(
-        (_, i) => i !== index
-      ),
+      reservations: travelData.reservations.filter((_, idx) => idx !== i),
     };
     updateAndSave(updated);
   };
 
-  // 로딩/없음 처리
-  if (loading)
-    return <div className="text-center p-8 text-gray-400">로딩 중...</div>;
+  /* ------------------------------
+      렌더링
+  ------------------------------ */
+  if (loading) return <div className="p-8 text-gray-400">로딩 중...</div>;
   if (!plan)
-    return (
-      <div className="text-center p-8 text-gray-400">
-        해당 여행 계획을 찾을 수 없습니다.
-      </div>
-    );
+    return <div className="p-8 text-gray-400">계획을 찾을 수 없습니다.</div>;
 
-  // renderContent 함수: 탭별 렌더링 (getReservationFields/getInputType는 상단에서 정의됨)
   const renderContent = () => {
     switch (selectedMenu) {
       case "info":
         return (
           <div>
             <h2 className="text-3xl font-bold mb-4">🧭 여행 정보</h2>
+
             <p className="mb-2 text-lg">
               작성자: {plan.author || "알 수 없음"}
             </p>
             <p className="mb-2 text-lg">
               여행 도시: {(plan.selectedCities || []).join(", ") || "미정"}
             </p>
-            <p className="mb-6 text-lg">
+            <p className="mb-2 text-lg">
               여행 기간:{" "}
               {plan.travelPeriod
                 ? `${new Date(
@@ -324,6 +276,8 @@ export default function TravelDetail() {
                   ).toLocaleDateString()}`
                 : "미정"}
             </p>
+            <p className="mb-2 text-lg">여행 타입: {plan.travelType}</p>
+            <p className="mb-2 text-lg">공개 여부: {plan.visibility}</p>
           </div>
         );
 

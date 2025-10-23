@@ -4,7 +4,7 @@ import { IoIosClose } from "react-icons/io";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-// 임시 도시 데이터
+// 임시 데이터
 const cityData = [
   { id: 1, name: "서울" },
   { id: 2, name: "부산" },
@@ -12,10 +12,26 @@ const cityData = [
   { id: 4, name: "대전" },
 ];
 
+const travelTypeOptions = [
+  { id: 1, name: "혼자" },
+  { id: 2, name: "커플" },
+  { id: 3, name: "가족" },
+  { id: 4, name: "친구" },
+  { id: 5, name: "비즈니스" },
+];
+
+const publicSettingOptions = [
+  { id: 1, name: "전체 공개" },
+  { id: 2, name: "친구 공개" },
+  { id: 3, name: "비공개" },
+];
+
 export default function CreatePlan() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCities, setSelectedCities] = useState([]);
   const [travelTitle, setTravelTitle] = useState("");
+  const [selectedType, setSelectedType] = useState(null);
+  const [selectedVisibility, setSelectedVisibility] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
@@ -35,20 +51,29 @@ export default function CreatePlan() {
     );
   };
 
+  // 날짜 변경
+  const handleDateChange = (dates) => {
+    const [start, end] = dates;
+    setStartDate(start);
+    setEndDate(end);
+  };
+
   // 완료 버튼 클릭
   const handleComplete = () => {
     if (
       selectedCities.length > 0 &&
       travelTitle.trim() !== "" &&
       startDate &&
-      endDate
+      endDate &&
+      selectedType &&
+      selectedVisibility
     ) {
       const selectedCityNames = cityData
         .filter((c) => selectedCities.includes(c.id))
         .map((c) => c.name);
 
       const user = JSON.parse(localStorage.getItem("currentUser"));
-      const username = user?.userId; // user가 null일 수도 있으니 optional chaining 사용
+      const username = user?.userId;
 
       const lastId = parseInt(localStorage.getItem("lastTravelId") || "0", 10);
       const newId = lastId + 1;
@@ -60,20 +85,27 @@ export default function CreatePlan() {
           travelTitle,
           selectedCities: selectedCityNames,
           travelPeriod: { startDate, endDate },
+          travelType: travelTypeOptions.find((t) => t.id === selectedType)
+            ?.name,
+          visibility: publicSettingOptions.find(
+            (v) => v.id === selectedVisibility
+          )?.name,
           author: username,
         },
       });
     } else {
-      alert("여행 제목, 도시, 기간을 모두 입력해 주세요.");
+      alert("여행 제목, 도시, 기간, 타입, 공개 여부를 모두 입력해 주세요.");
     }
   };
 
-  // 날짜 변경 핸들러
-  const handleDateChange = (dates) => {
-    const [start, end] = dates;
-    setStartDate(start);
-    setEndDate(end);
-  };
+  // 완료 버튼 활성화 조건
+  const isFormValid =
+    selectedCities.length > 0 &&
+    travelTitle.trim() !== "" &&
+    startDate &&
+    endDate &&
+    selectedType &&
+    selectedVisibility;
 
   return (
     <div className="p-6 bg-gray-900 min-h-screen text-white">
@@ -88,7 +120,7 @@ export default function CreatePlan() {
         </Link>
       </div>
 
-      {/* 여행 제목 입력 */}
+      {/* 여행 제목 */}
       <div className="mb-6">
         <label htmlFor="travelTitle" className="block text-lg font-medium mb-2">
           여행 제목
@@ -163,23 +195,69 @@ export default function CreatePlan() {
         />
       </div>
 
+      {/* 여행 타입 */}
+      <div className="mb-8">
+        <label className="block text-lg font-medium mb-4">여행 타입</label>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {travelTypeOptions.map((type) => (
+            <label
+              key={type.id}
+              className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition ${
+                selectedType === type.id
+                  ? "bg-blue-600 border-blue-400"
+                  : "bg-gray-800 border-gray-600 hover:bg-gray-700"
+              }`}
+            >
+              <input
+                type="radio"
+                name="travelType"
+                value={type.id}
+                checked={selectedType === type.id}
+                onChange={() => setSelectedType(type.id)}
+                className="hidden"
+              />
+              <span className="text-lg">{type.name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* 공개 여부 */}
+      <div className="mb-8">
+        <label className="block text-lg font-medium mb-4">공개 여부</label>
+        <div className="grid grid-cols-3 gap-3">
+          {publicSettingOptions.map((option) => (
+            <label
+              key={option.id}
+              className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition ${
+                selectedVisibility === option.id
+                  ? "bg-green-600 border-green-400"
+                  : "bg-gray-800 border-gray-600 hover:bg-gray-700"
+              }`}
+            >
+              <input
+                type="radio"
+                name="visibility"
+                value={option.id}
+                checked={selectedVisibility === option.id}
+                onChange={() => setSelectedVisibility(option.id)}
+                className="hidden"
+              />
+              <span className="text-lg">{option.name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       {/* 완료 버튼 */}
       <button
         onClick={handleComplete}
+        disabled={!isFormValid}
         className={`w-full p-4 text-xl font-bold rounded-lg transition-colors ${
-          selectedCities.length > 0 &&
-          travelTitle.trim() !== "" &&
-          startDate &&
-          endDate
+          isFormValid
             ? "bg-blue-600 hover:bg-blue-700"
             : "bg-gray-600 cursor-not-allowed"
         }`}
-        disabled={
-          selectedCities.length === 0 ||
-          travelTitle.trim() === "" ||
-          !startDate ||
-          !endDate
-        }
       >
         다음
       </button>
