@@ -14,8 +14,8 @@ public class PlanResponse {
     private Long planId;
     private String title;
     private String destination;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private String type;
     private String status;
     private LocalDateTime createdAt;
