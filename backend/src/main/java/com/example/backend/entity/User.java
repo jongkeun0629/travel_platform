@@ -35,6 +35,9 @@ public class User implements UserDetails, OAuth2User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Plan> plans;
+
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
@@ -42,7 +45,6 @@ public class User implements UserDetails, OAuth2User {
     private String password;
 
     @Column(nullable = true)
-
     private LocalDate birth;
 
     @Column(nullable = false, unique = true, length = 50)

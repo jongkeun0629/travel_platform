@@ -3,6 +3,7 @@ package com.example.backend.service;
 import com.example.backend.dto.PlanRequest;
 import com.example.backend.entity.Plan;
 import com.example.backend.entity.User;
+import com.example.backend.repository.ItemRepository;
 import com.example.backend.repository.PlanRepository;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,8 @@ public class PlanService {
 
     private final PlanRepository planRepository;
     private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
+    private final ItemService itemService;
 
     public Plan getPlanById(Long planId) {
         return planRepository.findById(planId)
@@ -24,6 +27,7 @@ public class PlanService {
     }
 
     public Plan createPlan(PlanRequest request, Long userId) {
+        System.out.println("createPlan");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다"));
 
@@ -38,7 +42,7 @@ public class PlanService {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-
+        System.out.println("plan builded");
         return planRepository.save(plan);
     }
 

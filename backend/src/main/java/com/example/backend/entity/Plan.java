@@ -19,6 +19,9 @@ public class Plan {
     @Column(name = "plan_id")
     private Long planId;
 
+//    @OneToOne(mappedBy = "plan", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    private Checklist checklist;
+
     @Column(name = "plan_title", nullable = false)
     private String title;
 
@@ -26,10 +29,10 @@ public class Plan {
     private String destination;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date", nullable = false)
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     private String type;
 
