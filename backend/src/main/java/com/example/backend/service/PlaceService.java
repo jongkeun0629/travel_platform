@@ -16,7 +16,7 @@ public class PlaceService {
 
     public Place createPlace(PlaceRequest request) {
         Place place = Place.builder()
-                .placeName(request.getPlcaeName())
+                .placeName(request.getPlaceName())
                 .address(request.getAddress())
                 .classification(request.getClassification())
                 .call(request.getCall())
@@ -35,7 +35,7 @@ public class PlaceService {
 
     public Place updatePlace(Long id, PlaceRequest request) {
         Place place = getPlaceById(id);
-        place.setPlaceName(request.getPlcaeName());
+        place.setPlaceName(request.getPlaceName());
         place.setAddress(request.getAddress());
         place.setClassification(request.getClassification());
         place.setCall(request.getCall());

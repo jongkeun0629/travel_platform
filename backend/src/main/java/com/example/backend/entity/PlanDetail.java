@@ -26,7 +26,7 @@ public class PlanDetail {
     private Place place;
 
     @Column(nullable = false)
-    private String day;
+    private String tripday;
 
     private String reserveInfo;
 
