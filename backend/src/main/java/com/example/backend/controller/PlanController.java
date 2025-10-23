@@ -20,6 +20,7 @@ public class PlanController {
             @RequestBody PlanRequest request,
             @RequestParam Long userId
     ) {
+        System.out.println(userId);
         Plan createdPlan = planService.createPlan(request, userId);
         return ResponseEntity.ok(PlanResponse.fromEntity(createdPlan));
     }

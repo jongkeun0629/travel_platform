@@ -19,12 +19,13 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="package-info" />
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -32,11 +33,14 @@
     &quot;assignee&quot;: &quot;seungjoon1011&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/ddiddokr/travel-platfrom.git&quot;,
-    &quot;accountId&quot;: &quot;51cee39a-aa94-462a-a96f-6d04c0dbb752&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/jongkeun0629/travel_platform.git",
+    "accountId": "51cee39a-aa94-462a-a96f-6d04c0dbb752"
   }
+}]]></component>
+  <component name="HttpClientOnboardingState">{
+  &quot;isOnboardingCommentShown&quot;: true
 }</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
@@ -52,6 +56,11 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Gradle.backend 빌드.executor": "Run",
+    "HTTP 요청.generated-requests | #10.executor": "Run",
+    "HTTP 요청.generated-requests | #11.executor": "Run",
+    "HTTP 요청.generated-requests | #13.executor": "Run",
+    "HTTP 요청.generated-requests | #14.executor": "Run",
+    "HTTP 요청.generated-requests | #3.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RequestMappingsPanelOrder0": "0",
     "RequestMappingsPanelOrder1": "1",
@@ -61,7 +70,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.BackendApplication.executor": "Run",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "feature/checkList",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/sjlee/travel-platfrom/backend/backend",
     "node.js.detected.package.eslint": "true",
@@ -72,7 +81,39 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RunDashboard">
+    <option name="configurationStatuses">
+      <map>
+        <entry key="HttpClient.HttpRequestRunConfigurationType">
+          <value>
+            <map>
+              <entry key="generated-requests | #10" value="STOPPED" />
+              <entry key="generated-requests | #11" value="STOPPED" />
+              <entry key="generated-requests | #13" value="STOPPED" />
+              <entry key="generated-requests | #14" value="STOPPED" />
+              <entry key="generated-requests | #3" value="STOPPED" />
+            </map>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="RunManager" selected="Spring Boot.BackendApplication">
+    <configuration name="generated-requests | #10" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" executionIdentifier="#10" index="10" runType="단일 요청 실행">
+      <method v="2" />
+    </configuration>
+    <configuration name="generated-requests | #11" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" executionIdentifier="#11" index="11" runType="단일 요청 실행">
+      <method v="2" />
+    </configuration>
+    <configuration name="generated-requests | #13" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" executionIdentifier="#13" index="13" runType="단일 요청 실행">
+      <method v="2" />
+    </configuration>
+    <configuration name="generated-requests | #14" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" executionIdentifier="#14" index="14" runType="단일 요청 실행">
+      <method v="2" />
+    </configuration>
+    <configuration name="generated-requests | #3" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" executionIdentifier="#3" index="3" runType="단일 요청 실행">
+      <method v="2" />
+    </configuration>
     <configuration name="BackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="backend.main" />
@@ -81,6 +122,23 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="HTTP 요청.generated-requests | #13" />
+      <item itemvalue="HTTP 요청.generated-requests | #14" />
+      <item itemvalue="HTTP 요청.generated-requests | #3" />
+      <item itemvalue="HTTP 요청.generated-requests | #10" />
+      <item itemvalue="HTTP 요청.generated-requests | #11" />
+      <item itemvalue="Spring Boot.BackendApplication" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="HTTP 요청.generated-requests | #14" />
+        <item itemvalue="HTTP 요청.generated-requests | #13" />
+        <item itemvalue="HTTP 요청.generated-requests | #10" />
+        <item itemvalue="HTTP 요청.generated-requests | #3" />
+        <item itemvalue="HTTP 요청.generated-requests | #11" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -102,6 +160,7 @@
       <updated>1760942002022</updated>
       <workItem from="1760942003160" duration="2671000" />
       <workItem from="1760945044117" duration="711000" />
+      <workItem from="1761191876622" duration="1292000" />
     </task>
     <task id="LOCAL-00001" summary="initialize springboot">
       <option name="closed" value="true" />

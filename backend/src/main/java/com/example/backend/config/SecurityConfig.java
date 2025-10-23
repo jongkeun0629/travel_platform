@@ -25,7 +25,10 @@ public class SecurityConfig {
                                 .requestMatchers(
 
                                         "/api/auth/**",
-                                        "/h2-console/**"
+                                        "/h2-console/**",
+                                        "/api/plans/**",
+                                        "/api/places/**",
+                                        "api/plan-details/**"
                                 ).permitAll()
                                 .anyRequest().authenticated()
                 )
