@@ -20,7 +20,11 @@ public class Place {
     @Column(nullable = false)
     private String placeName;
 
+    @Column(nullable = false)
     private String address;
     private String call;
     private String classification;
+
+    @Column(unique = true)
+    private String kakaoPlaceId;
 }

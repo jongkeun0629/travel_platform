@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/plan-details")
 @RequiredArgsConstructor
@@ -19,6 +21,18 @@ public class PlanDetailController {
     public ResponseEntity<PlanDetail> createPlanDetail(@RequestBody PlanDetailRequest request) {
         PlanDetail createdDetail = planDetailService.createPlanDetail(request);
         return ResponseEntity.ok(createdDetail);
+    }
+
+    @GetMapping("/plan/{planId}")
+    public ResponseEntity<List<PlanDetail>> getPlanDetailsByPlan(@PathVariable Long planId) {
+        List<PlanDetail> details = planDetailService.getPlanDetailsByPlanId(planId);
+        return ResponseEntity.ok(details);
+    }
+
+    @GetMapping("/{detailId}")
+    public ResponseEntity<PlanDetail> getPlanDetailById(@PathVariable Long detailId) {
+        PlanDetail detail = planDetailService.getPlanDetailById(detailId);
+        return ResponseEntity.ok(detail);
     }
 
     @PutMapping("/{detailId}")
