@@ -50,8 +50,13 @@ export default function CreatePlan() {
       const user = JSON.parse(localStorage.getItem("currentUser"));
       const username = user?.userId; // user가 null일 수도 있으니 optional chaining 사용
 
-      navigate("/traveldetail", {
+      const lastId = parseInt(localStorage.getItem("lastTravelId") || "0", 10);
+      const newId = lastId + 1;
+      localStorage.setItem("lastTravelId", newId.toString());
+
+      navigate(`/traveldetail/${newId}`, {
         state: {
+          id: newId,
           travelTitle,
           selectedCities: selectedCityNames,
           travelPeriod: { startDate, endDate },
