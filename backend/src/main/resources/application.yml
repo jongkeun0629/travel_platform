@@ -40,3 +40,10 @@ jwt:
   secret: "23bLwsCSUZf7Lw29r8PVpwOxTcHiTwp7l4EpEJuqBvg="
   expiration: 86400000
   refresh-expiration: 604800000
+aws:
+  s3:
+    bucket-name: "${AWS-BUCKET}"
+    region: "${AWS-REGION}"
+  credentials:
+    access-key: "${AWS-ACCESS}"
+    secret-key: "${AWS-SECRET}"
