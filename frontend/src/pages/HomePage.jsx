@@ -118,7 +118,7 @@ export default function HomePage() {
       {/* 하단 섹션 */}
       <div className="flex justify-center items-center h-100">
         <Link
-          to="/startpage"
+          to="/createplan"
           className="text-blue-400 hover:underline text-3xl"
         >
           여행 시작하기
