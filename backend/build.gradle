@@ -51,7 +51,14 @@ dependencies {
 
     // 이메일 발송 기능
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    // AWS S3
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.565'
 
+    // Image Processing
+    implementation 'net.coobird:thumbnailator:0.4.19'
+
+    // Rate Limiting
+    implementation 'com.bucket4j:bucket4j-core:8.7.0'
 }
 
 tasks.named('test') {

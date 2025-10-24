@@ -42,8 +42,8 @@ jwt:
   refresh-expiration: 604800000
 aws:
   s3:
-    bucket-name: travel-plan-image
-    region: ap-northeast-2
+    bucket-name: "${AWS-BUCKET}"
+    region: "${AWS-REGION}"
   credentials:
-    access-key: AKIA6HZ7MYJOLUXMZYW4
+    access-key: "${AWS-ACCESS}"
     secret-key: "${AWS-SECRET}"
