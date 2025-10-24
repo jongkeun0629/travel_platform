@@ -42,13 +42,14 @@ export default function ProfilePage() {
         const currentUser = userService.getCurrentUser();
         if (!currentUser) {
             navigate("/login", { replace: true });
+            setIsLoading(false);
         } else {
             setUser(currentUser);
             const data = getProfileData(currentUser);
             setProfileData(data);
+            setIsLoading(false);
         }
-        setIsLoading(false);
-    }, []);
+    }, [navigate]);
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -61,13 +62,29 @@ export default function ProfilePage() {
     const handleSaveProfile = (updatedData) => {
         if (!user) return;
 
-        const allProfiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
-        allProfiles[user.userId] = updatedData;
-        localStorage.setItem(PROFILES_KEY, JSON.stringify(allProfiles));
+        try {
+            const authUpdate = {
+                userId: updatedData.userId,
+                email: updatedData.email
+            };
 
-        setProfileData(updatedData);
-        setIsEditing(false);
-        alert("프로필이 저장되었습니다.")
+            userService.updateUser(user.userId, authUpdate);
+
+            const allProfiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
+
+            if (user.userId !== updatedData.userId) {
+                delete allProfiles[user.userId];
+            }
+
+            allProfiles[updatedData.userId] == updatedData;
+            localStorage.setItem(PROFILES_KEY, JSON.stringify(allProfiles));
+
+            setProfileData(updatedData);
+            setUser(authUpdate);
+            setIsEditing(false);
+        } catch (err) {
+            alert(err.message);
+        }
     };
 
     return (
