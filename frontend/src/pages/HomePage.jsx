@@ -22,11 +22,6 @@ export default function HomePage() {
 
   if (!user) return null;
 
-  const handleLogout = () => {
-    userService.logout();
-    navigate("/login");
-  };
-
   const handleDeletePlan = (id) => {
     const updated = plans.filter((p) => p.id !== id);
     setPlans(updated);
@@ -35,29 +30,8 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
-      {/* 헤더 */}
-      <div className="flex justify-between items-center bg-gray-800 p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-bold text-white">
-          안녕하세요, <span className="text-blue-400">{user.userId}</span> 님
-        </h2>
-        <div className="flex gap-2">
-          <Link
-            to="/profile"
-            className="text-sm bg-gray-700 hover:bg-gray-600 transition-colors rounded-lg px-4 py-2 font-medium"
-          >
-            마이페이지
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="text-sm bg-gray-700 hover:bg-gray-600 transition-colors rounded-lg px-4 py-2 font-medium"
-          >
-            로그아웃
-          </button>
-        </div>
-      </div>
-
       {/* 여행 계획 목록 */}
-      <div className="bg-gray-800 p-6 rounded-xl shadow-lg">
+      <div className="bg-gray-800 p-6 rounded-xl shadow-lg mt-5">
         <h3 className="text-xl font-semibold mb-4 text-white">
           🧳 내 여행 계획
         </h3>
