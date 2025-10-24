@@ -9,14 +9,7 @@ const PROFILES_KEY = "travel_profiles";
 const getProfileData = (user) => {
     if (!user) return null;
 
-    const allProfiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
-    const userProfile = allProfiles[user.userId];
-
-    if (userProfile) {
-        return userProfile;
-    }
-
-    return {
+    const defaultProfile = {
         userId: user.userId,
         email: user.email,
         introduction: "",
@@ -28,6 +21,18 @@ const getProfileData = (user) => {
             reviews: 0,
         }
     };
+
+    const allProfiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
+    const userProfile = allProfiles[user.userId];
+
+    if (userProfile) {
+        return {
+            ...defaultProfile,
+            ...userProfile
+        };
+    }
+
+    return defaultProfile;
 };
 
 export default function ProfilePage() {
@@ -41,8 +46,8 @@ export default function ProfilePage() {
     useEffect(() => {
         const currentUser = userService.getCurrentUser();
         if (!currentUser) {
-            navigate("/login", { replace: true });
             setIsLoading(false);
+            navigate("/login", { replace: true });
         } else {
             setUser(currentUser);
             const data = getProfileData(currentUser);
@@ -76,7 +81,7 @@ export default function ProfilePage() {
                 delete allProfiles[user.userId];
             }
 
-            allProfiles[updatedData.userId] == updatedData;
+            allProfiles[updatedData.userId] = updatedData;
             localStorage.setItem(PROFILES_KEY, JSON.stringify(allProfiles));
 
             setProfileData(updatedData);
