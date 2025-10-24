@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -62,4 +63,12 @@ public class PlanService {
         Plan plan = getPlanById(planId);
         planRepository.delete(plan);
     }
+
+    public List<Plan> getPlansByUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        return planRepository.findByUser(user);
+    }
+
 }

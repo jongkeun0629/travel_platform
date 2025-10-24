@@ -8,4 +8,5 @@ public class PlaceRequest {
     private String address;
     private String classification;
     private String call;
+    private String kakaoPlaceId;
 }

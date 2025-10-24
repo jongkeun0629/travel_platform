@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
-import StartPage from "./pages/StartPage";
 import CreatePlan from "./pages/CreatePlan";
 import RegisterPage from "./pages/RegisterPage";
 import NotFound from "./pages/NotFound";
 import TravelDetail from "./pages/TravelDetail";
+import ProfilePage from "./pages/ProfilePage";
 
 export default function App() {
   return (
@@ -17,11 +17,10 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/startpage" element={<StartPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/createplan" element={<CreatePlan />} />
             <Route path="/" element={<HomePage />} />
-            {/* /travel/:id */}
-            <Route path="/traveldetail" element={<TravelDetail />} />
+            <Route path="/traveldetail/:id" element={<TravelDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
