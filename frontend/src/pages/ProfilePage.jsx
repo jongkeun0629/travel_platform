@@ -9,14 +9,7 @@ const PROFILES_KEY = "travel_profiles";
 const getProfileData = (user) => {
     if (!user) return null;
 
-    const allProfiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
-    const userProfile = allProfiles[user.userId];
-
-    if (userProfile) {
-        return userProfile;
-    }
-
-    return {
+    const defaultProfile = {
         userId: user.userId,
         email: user.email,
         introduction: "",
@@ -28,6 +21,18 @@ const getProfileData = (user) => {
             reviews: 0,
         }
     };
+
+    const allProfiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
+    const userProfile = allProfiles[user.userId];
+
+    if (userProfile) {
+        return {
+            ...defaultProfile,
+            ...userProfile
+        };
+    }
+
+    return defaultProfile;
 };
 
 export default function ProfilePage() {
@@ -41,14 +46,15 @@ export default function ProfilePage() {
     useEffect(() => {
         const currentUser = userService.getCurrentUser();
         if (!currentUser) {
+            setIsLoading(false);
             navigate("/login", { replace: true });
         } else {
             setUser(currentUser);
             const data = getProfileData(currentUser);
             setProfileData(data);
+            setIsLoading(false);
         }
-        setIsLoading(false);
-    }, []);
+    }, [navigate]);
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -61,13 +67,29 @@ export default function ProfilePage() {
     const handleSaveProfile = (updatedData) => {
         if (!user) return;
 
-        const allProfiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
-        allProfiles[user.userId] = updatedData;
-        localStorage.setItem(PROFILES_KEY, JSON.stringify(allProfiles));
+        try {
+            const authUpdate = {
+                userId: updatedData.userId,
+                email: updatedData.email
+            };
 
-        setProfileData(updatedData);
-        setIsEditing(false);
-        alert("프로필이 저장되었습니다.")
+            userService.updateUser(user.userId, authUpdate);
+
+            const allProfiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
+
+            if (user.userId !== updatedData.userId) {
+                delete allProfiles[user.userId];
+            }
+
+            allProfiles[updatedData.userId] = updatedData;
+            localStorage.setItem(PROFILES_KEY, JSON.stringify(allProfiles));
+
+            setProfileData(updatedData);
+            setUser(authUpdate);
+            setIsEditing(false);
+        } catch (err) {
+            alert(err.message);
+        }
     };
 
     return (

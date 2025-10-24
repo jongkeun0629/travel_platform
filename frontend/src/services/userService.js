@@ -59,4 +59,37 @@ export const userService = {
   logout() {
     localStorage.removeItem(USER_KEY);
   },
+
+  updateUser(old, updateData) {
+    const users = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+    const userIndex = users.findIndex(u => u.userId === old);
+
+    if (userIndex === -1) {
+      throw new Error("사용자를 찾을 수 없습니다.");
+    }
+
+    const newUserId = updateData.userId;
+    const isDuplicate = users.some(
+      (u, index) => index !== userIndex && u.userId === newUserId
+    );
+
+    if (isDuplicate) {
+      throw new Error("이미 사용 중인 아이디입니다.")
+    }
+
+    users[userIndex] = {
+      ...users[userIndex],
+      userId: newUserId,
+      email: updateData.email
+    };
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+
+    const currentUser = JSON.parse(localStorage.getItem(USERS_KEY));
+    if (currentUser && currentUser.userId === old) {
+      currentUser.userId = newUserId;
+      localStorage.setItem(USERS_KEY, JSON.stringify(currentUser));
+    }
+
+    return currentUser;
+  },
 };
