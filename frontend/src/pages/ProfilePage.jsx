@@ -59,10 +59,10 @@ export default function ProfilePage() {
     };
 
     const handleSaveProfile = (updatedData) => {
-        if (!currentUser) return;
+        if (!user) return;
 
         const allProfiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
-        allProfiles[currentUser.userId] = updatedData;
+        allProfiles[user.userId] = updatedData;
         localStorage.setItem(PROFILES_KEY, JSON.stringify(allProfiles));
 
         setProfileData(updatedData);
