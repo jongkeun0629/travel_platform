@@ -19,7 +19,7 @@ public class ItemResponse {
 
 
     public static ItemResponse fromEntity(Item item) {
-        Long planId = item.getPlan() != null ? item.getPlan().getPlanId() : null;
+        Long planId = item.getPlan() != null ? item.getPlan().getId() : null;
 
         return ItemResponse.builder()
                 .id(item.getId())

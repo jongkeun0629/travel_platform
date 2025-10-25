@@ -24,6 +24,9 @@ public class AuthService {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("이미 사용중인 이메일입니다.");
         }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("이미 사용중인 사용자명입니다.");
+        }
 
         User user = User.builder()
                 .email(request.getEmail())
@@ -47,8 +50,12 @@ public class AuthService {
     }
 
     public AuthResponse login(AuthRequest request) {
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("이메일이 올바르지 않습니다."));
+        String loginId = request.getEmail() != null ? request.getEmail() : request.getUsername();
+
+
+        var user = userRepository.findByEmail(loginId)
+                .or(() -> userRepository.findByUsername(loginId))
+                .orElseThrow(() -> new IllegalArgumentException("이메일 / 사용자명이 올바르지 않습니다."));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 올바르지 않습니다.");

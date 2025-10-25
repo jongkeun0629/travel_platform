@@ -98,7 +98,7 @@ public class PlanDetailService {
     }
 
     public List<PlanDetail> getPlanDetailsByPlanId(Long planId) {
-        return planDetailRepository.findByPlanId(planId);
+        return planDetailRepository.findByPlan_Id(planId);
     }
 
     public PlanDetail getPlanDetailById(Long detailId) {

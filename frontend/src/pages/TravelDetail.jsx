@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import KakaoMapModal from "../components/Map/KakaoMapModal";
 import { FaRegEdit } from "react-icons/fa";
-import { CreatePlanForm } from "./CreatePlan"; // 추가: CreatePlanForm 재사용
+import { CreatePlanForm } from "./CreatePlan";
+import planService from "../services/plan";
 
 // 입력 타입 자동 판단
 const getInputType = (label) => {
@@ -46,6 +47,7 @@ const getReservationFields = (type) => {
 export default function TravelDetail() {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [plan, setPlan] = useState(null);
   const [travelData, setTravelData] = useState({
@@ -71,7 +73,7 @@ export default function TravelDetail() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalField, setModalField] = useState("");
 
-  // 수정용 modal (CreatePlanForm 재사용)
+  // 수정용 modal (CreatePlanForm)
   const [editInfoOpen, setEditInfoOpen] = useState(false);
 
   // 일정/예약 편집 인덱스 및 임시 데이터
@@ -81,18 +83,31 @@ export default function TravelDetail() {
   const [editingReservationData, setEditingReservationData] = useState(null);
 
   /* ------------------------------
-      저장/업데이트 유틸 함수
+      서버 저장/업데이트 유틸 함수
   ------------------------------ */
-  const saveToLocalStorage = (updatedPlan) => {
-    const savedPlans = JSON.parse(localStorage.getItem("travelPlans") || "[]");
-    const filtered = savedPlans.filter(
-      (p) => Number(p.id) !== Number(updatedPlan.id)
-    );
-    const newArr = [...filtered, updatedPlan];
-    localStorage.setItem("travelPlans", JSON.stringify(newArr));
+  const saveToBackend = async (fullPlan) => {
+    try {
+      if (!fullPlan.id) {
+        const created = await planService.createPlan(fullPlan);
+        setPlan(created);
+        setTravelData(created.travelData || fullPlan.travelData || travelData);
+        return created;
+      } else {
+        const updated = await planService.updatePlan(fullPlan.id, fullPlan);
+        setPlan(updated);
+        setTravelData(updated.travelData || fullPlan.travelData || travelData);
+        return updated;
+      }
+    } catch (err) {
+      console.error("Backend save failed:", err);
+      alert(
+        "서버에 저장하는 데 실패했습니다. 네트워크 또는 서버 상태를 확인하세요."
+      );
+      throw err;
+    }
   };
 
-  const updateAndSave = (updatedTravelData) => {
+  const updateAndSave = async (updatedTravelData) => {
     const updatedPlan = {
       ...(plan || {}),
       id: plan?.id ?? id,
@@ -100,66 +115,71 @@ export default function TravelDetail() {
     };
     setPlan(updatedPlan);
     setTravelData(updatedTravelData);
-    saveToLocalStorage(updatedPlan);
+    await saveToBackend(updatedPlan);
   };
 
-  // 여행 기본 정보 수정 핸들러 (CreatePlanForm의 onSave으로 사용됨)
-  const handleUpdateInfo = (updated) => {
-    // updated는 CreatePlanForm에서 전달한 전체 plan 객체
+  // 여행 기본 정보 수정 핸들러 (CreatePlanForm의 onSave)
+  const handleUpdateInfo = async (updated) => {
     const merged = { ...(plan || {}), ...updated };
     setPlan(merged);
     if (updated.travelData) setTravelData(updated.travelData);
-    saveToLocalStorage(merged);
+    try {
+      await saveToBackend(merged);
+      setEditInfoOpen(false);
+      alert("기본 정보가 저장되었습니다.");
+    } catch (err) {}
   };
 
   /* ------------------------------
       초기 로드
   ------------------------------ */
   useEffect(() => {
-    const savedPlans = JSON.parse(localStorage.getItem("travelPlans") || "[]");
-
-    if (location.state && location.state.id) {
-      const newPlan = {
-        id: location.state.id,
-        travelTitle: location.state.travelTitle,
-        selectedCities: location.state.selectedCities || [],
-        travelPeriod: location.state.travelPeriod,
-        author: location.state.author,
-        travelType: location.state.travelType || "일반 여행",
-        visibility: location.state.visibility || "전체 공개",
-        travelData: location.state.travelData || {
-          checklist: ["교통편", "숙소", "세면도구", "의류", "충전기"],
-          itinerary: [],
-          reservations: [],
-        },
-      };
-      // 체크리스트가 문자열로 되어 있으면 객체로 변환 (체크 상태 포함)
-      newPlan.travelData.checklist = (newPlan.travelData.checklist || []).map(
-        (it) => (typeof it === "string" ? { text: it, checked: false } : it)
-      );
-      setPlan(newPlan);
-      setTravelData(newPlan.travelData);
-      saveToLocalStorage(newPlan);
-    } else {
-      const existing = savedPlans.find((p) => Number(p.id) === Number(id));
-      if (existing) {
-        // 기존 저장된 체크리스트 항목이 문자열 배열이면 객체로 변환
-        existing.travelData = existing.travelData || {
-          checklist: [],
-          itinerary: [],
-          reservations: [],
-        };
-        existing.travelData.checklist = (
-          existing.travelData.checklist || []
-        ).map((it) =>
-          typeof it === "string" ? { text: it, checked: false } : it
+    const load = async () => {
+      setLoading(true);
+      try {
+        if (location.state && location.state.id) {
+          const maybe = location.state;
+          setPlan(maybe);
+          setTravelData(
+            maybe.travelData || {
+              checklist: [],
+              itinerary: [],
+              reservations: [],
+            }
+          );
+        } else {
+          const fetched = await planService.getPlanById(id);
+          if (!fetched) {
+            setPlan(null);
+            alert("해당 여행 계획을 찾을 수 없습니다.");
+          } else {
+            fetched.travelData = fetched.travelData || {
+              checklist: [],
+              itinerary: [],
+              reservations: [],
+            };
+            fetched.travelData.checklist = (
+              fetched.travelData.checklist || []
+            ).map((it) =>
+              typeof it === "string" ? { text: it, checked: false } : it
+            );
+            setPlan(fetched);
+            setTravelData(fetched.travelData);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch plan from backend:", err);
+        alert(
+          "서버에서 여행 계획을 불러오는 데 실패했습니다. 네트워크 또는 서버 상태를 확인하세요."
         );
-        setPlan(existing);
-        setTravelData(existing.travelData);
+        setPlan(null);
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
-  }, [id]);
+    };
+
+    load();
+  }, [id, location.state]);
 
   /* ------------------------------
       모달(카카오맵) 관련
@@ -191,9 +211,9 @@ export default function TravelDetail() {
   };
 
   /* ------------------------------
-      체크리스트 핸들러 (체크박스 상태 저장 포함)
+      체크리스트 핸들러
   ------------------------------ */
-  const handleAddChecklist = () => {
+  const handleAddChecklist = async () => {
     if (!newChecklist.trim()) return;
     const updated = {
       ...travelData,
@@ -202,33 +222,40 @@ export default function TravelDetail() {
         { text: newChecklist.trim(), checked: false },
       ],
     };
-    updateAndSave(updated);
-    setNewChecklist("");
+    try {
+      await updateAndSave(updated);
+      setNewChecklist("");
+    } catch (err) {
+      // save 실패 시 updateAndSave에서 알림
+    }
   };
 
-  const handleRemoveChecklist = (i) => {
+  const handleRemoveChecklist = async (i) => {
     const updated = {
       ...travelData,
       checklist: travelData.checklist.filter((_, idx) => idx !== i),
     };
-    updateAndSave(updated);
+    try {
+      await updateAndSave(updated);
+    } catch (err) {}
   };
 
-  // 추가 기능: 체크박스 클릭해서 완료 여부 저장
-  const handleToggleChecklist = (i) => {
+  const handleToggleChecklist = async (i) => {
     const updated = {
       ...travelData,
       checklist: travelData.checklist.map((item, idx) =>
         idx === i ? { ...item, checked: !item.checked } : item
       ),
     };
-    updateAndSave(updated);
+    try {
+      await updateAndSave(updated);
+    } catch (err) {}
   };
 
   /* ------------------------------
-      일정 핸들러 (추가 / 삭제 / 편집)
+      일정 핸들러
   ------------------------------ */
-  const handleAddPlan = () => {
+  const handleAddPlan = async () => {
     if (!newPlan.date || !newPlan.time || !newPlan.content) {
       alert("날짜, 시간, 내용을 모두 입력하세요.");
       return;
@@ -237,41 +264,45 @@ export default function TravelDetail() {
       ...travelData,
       itinerary: [...(travelData.itinerary || []), newPlan],
     };
-    updateAndSave(updated);
-    setNewPlan({ date: "", time: "", place: "", content: "" });
+    try {
+      await updateAndSave(updated);
+      setNewPlan({ date: "", time: "", place: "", content: "" });
+    } catch (err) {}
   };
 
-  const handleRemovePlan = (i) => {
+  const handleRemovePlan = async (i) => {
     const updated = {
       ...travelData,
       itinerary: travelData.itinerary.filter((_, idx) => idx !== i),
     };
-    updateAndSave(updated);
+    try {
+      await updateAndSave(updated);
+    } catch (err) {}
   };
 
-  // 추가 기능: 일정 편집 시작
   const startEditItinerary = (i) => {
     setEditingItineraryIndex(i);
     setEditingItineraryData(travelData.itinerary[i]);
-    // 포커스 등을 위해 해당 탭으로 이동
     setSelectedMenu("itinerary");
   };
 
-  const saveEditItinerary = () => {
+  const saveEditItinerary = async () => {
     if (editingItineraryIndex === null) return;
     const updatedItinerary = travelData.itinerary.map((it, idx) =>
       idx === editingItineraryIndex ? editingItineraryData : it
     );
     const updated = { ...travelData, itinerary: updatedItinerary };
-    updateAndSave(updated);
-    setEditingItineraryIndex(null);
-    setEditingItineraryData(null);
+    try {
+      await updateAndSave(updated);
+      setEditingItineraryIndex(null);
+      setEditingItineraryData(null);
+    } catch (err) {}
   };
 
   /* ------------------------------
-      예약 핸들러 (추가 / 삭제 / 편집)
+      예약 핸들러
   ------------------------------ */
-  const handleAddReservation = () => {
+  const handleAddReservation = async () => {
     const fields = getReservationFields(reservationType);
     const missing = fields.some(
       (f) =>
@@ -288,16 +319,20 @@ export default function TravelDetail() {
         { type: reservationType, ...newReservation },
       ],
     };
-    updateAndSave(updated);
-    setNewReservation({});
+    try {
+      await updateAndSave(updated);
+      setNewReservation({});
+    } catch (err) {}
   };
 
-  const handleRemoveReservation = (i) => {
+  const handleRemoveReservation = async (i) => {
     const updated = {
       ...travelData,
       reservations: travelData.reservations.filter((_, idx) => idx !== i),
     };
-    updateAndSave(updated);
+    try {
+      await updateAndSave(updated);
+    } catch (err) {}
   };
 
   const startEditReservation = (i) => {
@@ -306,15 +341,44 @@ export default function TravelDetail() {
     setSelectedMenu("reservations");
   };
 
-  const saveEditReservation = () => {
+  const saveEditReservation = async () => {
     if (editingReservationIndex === null) return;
     const updatedReservations = travelData.reservations.map((it, idx) =>
       idx === editingReservationIndex ? editingReservationData : it
     );
     const updated = { ...travelData, reservations: updatedReservations };
-    updateAndSave(updated);
-    setEditingReservationIndex(null);
-    setEditingReservationData(null);
+    try {
+      await updateAndSave(updated);
+      setEditingReservationIndex(null);
+      setEditingReservationData(null);
+    } catch (err) {}
+  };
+
+  const saveToServer = async () => {
+    if (!plan) {
+      alert("저장할 계획이 없습니다.");
+      return;
+    }
+    try {
+      const payload = { ...plan, travelData };
+      await saveToBackend(payload);
+      alert("저장되었습니다.");
+    } catch (err) {}
+  };
+
+  const handleDeletePlan = async () => {
+    if (!confirm("정말로 이 여행 계획을 삭제하시겠습니까?")) return;
+    try {
+      if (plan?.id) {
+        await planService.deletePlan(plan.id);
+        navigate("/", { replace: true });
+      } else {
+        alert("삭제할 계획 ID가 없습니다.");
+      }
+    } catch (err) {
+      console.error("Failed to delete plan:", err);
+      alert("서버에서 삭제하는 데 실패했습니다.");
+    }
   };
 
   /* ------------------------------
@@ -332,24 +396,17 @@ export default function TravelDetail() {
             <h2 className="text-3xl font-bold mb-4">🧭 여행 정보</h2>
 
             <p className="mb-2 text-lg">
-              작성자: {plan.author || "알 수 없음"}
+              작성자: {plan.user.username || "알 수 없음"}
             </p>
+            <p className="mb-2 text-lg">여행 도시: {plan.destination}</p>
             <p className="mb-2 text-lg">
-              여행 도시: {(plan.selectedCities || []).join(", ") || "미정"}
+              여행 기간: {""}
+              {new Date(plan.startDate).toLocaleDateString()} ~
+              {new Date(plan.endDate).toLocaleDateString()}
             </p>
-            <p className="mb-2 text-lg">
-              여행 기간:{" "}
-              {plan.travelPeriod
-                ? `${new Date(
-                    plan.travelPeriod.startDate
-                  ).toLocaleDateString()} ~ ${new Date(
-                    plan.travelPeriod.endDate
-                  ).toLocaleDateString()}`
-                : "미정"}
-            </p>
-            <p className="mb-2 text-lg">여행 타입: {plan.travelType}</p>
+            <p className="mb-2 text-lg">여행 타입: {plan.type}</p>
             <p className="mb-2 text-lg">공개 여부: {plan.visibility}</p>
-            {/* 추가 기능: 현재 여행 정보 가지고 CreatePlanForm 팝업으로 열기 */}
+
             <button
               onClick={() => setEditInfoOpen(true)}
               className="bg-gray-800 hover:bg-gray-700 mt-4 px-4 py-2 rounded-lg text-lg"
@@ -357,7 +414,6 @@ export default function TravelDetail() {
               수정
             </button>
 
-            {/* 팝업으로 CreatePlanForm 재사용 */}
             {editInfoOpen && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
                 <div className="w-full max-w-3xl bg-gray-900 rounded-lg overflow-auto max-h-[90vh]">
@@ -377,7 +433,6 @@ export default function TravelDetail() {
           travelData.checklist && travelData.checklist.length
             ? travelData.checklist
             : [];
-
         return (
           <div>
             <h2 className="text-3xl font-bold mb-4">📋 체크리스트</h2>
@@ -404,7 +459,6 @@ export default function TravelDetail() {
                   className="flex justify-between items-center bg-gray-800 p-3 mb-2 rounded-lg shadow-md text-lg"
                 >
                   <div className="flex items-center gap-5">
-                    {/* 추가 기능: 체크박스 on/off 값 저장(ischecked) */}
                     <input
                       type="checkbox"
                       checked={item.checked}
@@ -502,7 +556,7 @@ export default function TravelDetail() {
                   />
                   <button
                     onClick={() => handleOpenModal("place")}
-                    className="bg-blue-600  cursor-pointer hover:bg-blue-700 px-3 py-2 rounded-lg text-white w-20"
+                    className="bg-blue-600 cursor-pointer hover:bg-blue-700 px-3 py-2 rounded-lg text-white w-20"
                   >
                     검색
                   </button>
@@ -583,7 +637,6 @@ export default function TravelDetail() {
                     <p>{p.content}</p>
                   </div>
                   <div>
-                    {/* 추가 기능: 클릭 시 현재 일정 내용 수정(날짜, 시간, 장소, 내용) */}
                     <button
                       onClick={() => startEditItinerary(idx)}
                       className="mr-5 text-xl"
@@ -661,7 +714,7 @@ export default function TravelDetail() {
                     {isSearchable && (
                       <button
                         onClick={() => handleOpenModal(f)}
-                        className="bg-blue-600  cursor-pointer hover:bg-blue-700 px-3 py-2 rounded-lg text-white w-20"
+                        className="bg-blue-600 cursor-pointer hover:bg-blue-700 px-3 py-2 rounded-lg text-white w-20"
                       >
                         검색
                       </button>
@@ -722,7 +775,6 @@ export default function TravelDetail() {
                     )}
                   </div>
                   <div className="flex items-center">
-                    {/* 추가 기능: 클릭 시 현재 예약 내용 수정(예약 유형(교통, 숙소, 음식점)에 따른 정보) */}
                     <button
                       onClick={() => startEditReservation(idx)}
                       className="mr-5 text-xl"
@@ -752,11 +804,19 @@ export default function TravelDetail() {
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-4xl font-bold">{plan.travelTitle}</h1>
-        <Link to="/">
-          <button className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-lg">
-            홈으로
+        <div className="flex gap-2">
+          <Link to="/">
+            <button className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-lg">
+              홈으로
+            </button>
+          </Link>
+          <button
+            onClick={handleDeletePlan}
+            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-lg"
+          >
+            삭제
           </button>
-        </Link>
+        </div>
       </div>
 
       <div className="flex border-b border-gray-700 mb-6 text-xl">

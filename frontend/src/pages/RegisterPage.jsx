@@ -1,31 +1,39 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { userService } from "../services/userService";
+import useAuthStore from "../store/authStore";
 
 export default function RegisterPage() {
-  const [userId, setUserId] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const { register, loading, error } = useAuthStore();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    birth: "",
+    username: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-
-    if (!userId || !email || !password) {
-      setError("아이디, 이메일, 비밀번호를 모두 입력해주세요.");
-      return;
-    }
-
     try {
-      userService.register({ userId, email, password });
-      alert("회원가입이 완료되었습니다!");
+      // 회원가입 요청
+      await register(formData);
       navigate("/login");
     } catch (err) {
-      setError(err.message);
+      console.error(err);
     }
   };
+
+  const isFormValid =
+    formData.email && formData.birth && formData.username && formData.password;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
@@ -33,17 +41,19 @@ export default function RegisterPage() {
         <h1 className="text-3xl font-extrabold mb-6 text-center text-white">
           회원가입
         </h1>
-        <form onSubmit={handleRegister} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-400">
               아이디
             </label>
             <input
               type="text"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="아이디를 입력하세요"
+              required
             />
           </div>
           <div>
@@ -52,10 +62,12 @@ export default function RegisterPage() {
             </label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="이메일을 입력하세요"
+              required
             />
           </div>
           <div>
@@ -64,20 +76,39 @@ export default function RegisterPage() {
             </label>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="비밀번호를 입력하세요"
+              required
             />
           </div>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-400">
+              생년월일
+            </label>
+            <input
+              type="date"
+              name="birth"
+              value={formData.birth}
+              onChange={handleChange}
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="생년월일을 입력하세요"
+              required
+            />
+          </div>
           <button
             type="submit"
             className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading || !isFormValid}
           >
-            회원가입
+            {loading ? "회원 가입 중..." : "회원 가입"}
           </button>
         </form>
+        {error && (
+          <p className="text-red-500 text-xs text-center mt-4">{error}</p>
+        )}
         <div className="mt-6 text-center">
           <Link to="/login" className="text-blue-400 hover:underline">
             로그인하기

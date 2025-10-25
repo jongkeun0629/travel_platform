@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface PlanDetailRepository extends JpaRepository<PlanDetail, Long> {
-    List<PlanDetail> findByPlanId(Long planId);
+    List<PlanDetail> findByPlan_Id(Long planId);
 }

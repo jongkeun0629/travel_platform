@@ -15,6 +15,7 @@ public class RegisterRequest {
     @NotBlank(message = "password is required")
     private String password;
 
+    @NotBlank(message = "username is required")
     private String username;
 
     private LocalDate birth;

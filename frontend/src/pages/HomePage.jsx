@@ -1,31 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { userService } from "../services/userService";
+import useAuthStore from "../store/authStore";
 import KakaoMap from "../components/Map/KakaoMap";
+import planService from "../services/plan";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+
+  const { user, logout } = useAuthStore();
+
   const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const currentUser = userService.getCurrentUser();
-    if (!currentUser) {
-      navigate("/login", { replace: true });
-    } else {
-      setUser(currentUser);
+    const loadPlans = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const content = await planService.getAllPlans();
+        setPlans(content || []);
+      } catch (e) {
+        console.error("Failed to load plans", e);
+        setError("여행 계획을 불러오는 데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPlans();
+  }, []);
+
+  const handleDeletePlan = async (id) => {
+    if (!confirm("정말로 이 여행 계획을 삭제하시겠습니까?")) return;
+    try {
+      await api.delete(`/api/plans/${id}`);
+      setPlans((prev) => prev.filter((p) => p.id !== id));
+    } catch (e) {
+      console.error("Failed to delete plan", e);
+      alert("삭제에 실패했습니다.");
     }
-
-    const savedPlans = JSON.parse(localStorage.getItem("travelPlans") || "[]");
-    setPlans(savedPlans);
-  }, [navigate]);
-
-  if (!user) return null;
-
-  const handleDeletePlan = (id) => {
-    const updated = plans.filter((p) => p.id !== id);
-    setPlans(updated);
-    localStorage.setItem("travelPlans", JSON.stringify(updated));
   };
 
   return (
@@ -36,7 +50,11 @@ export default function HomePage() {
           🧳 내 여행 계획
         </h3>
 
-        {plans.length === 0 ? (
+        {loading ? (
+          <p className="text-gray-400 text-center py-6">로딩 중...</p>
+        ) : error ? (
+          <p className="text-red-400 text-center py-6">{error}</p>
+        ) : plans.length === 0 ? (
           <p className="text-gray-400 text-center py-6">
             아직 여행 계획이 없습니다.
           </p>

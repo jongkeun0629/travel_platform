@@ -1,4 +1,10 @@
-import { BrowserRouter, Routes, Route, Outlet, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Outlet,
+  useNavigate,
+} from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import CreatePlan from "./pages/CreatePlan";
@@ -7,22 +13,22 @@ import NotFound from "./pages/NotFound";
 import TravelDetail from "./pages/TravelDetail";
 import ProfilePage from "./pages/ProfilePage";
 import Navbar from "./components/layout/Navbar";
-import { useEffect, useState } from "react";
-import { userService } from "./services/userService";
+import { useEffect } from "react";
+import useAuthStore from "./store/authStore";
 
 function AppLayout() {
-  const [user, setUser] = useState(userService.getCurrentUser());
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) {
-      navigate("/login", {replace: true});
+      navigate("/login", { replace: true });
     }
   }, [user, navigate]);
 
   const handleLogout = () => {
-    userService.logout();
-    setUser(null);
+    logout();
   };
 
   if (!user) {
@@ -54,7 +60,7 @@ export default function App() {
               <Route path="/traveldetail/:id" element={<TravelDetail />} />
               <Route path="*" element={<NotFound />} />
             </Route>
-            
+
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
           </Routes>

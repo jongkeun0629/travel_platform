@@ -27,7 +27,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    @Value("localhost:5173")
+    @Value("http://localhost:5173")
     private String frontendUrl;
 
     @Bean

@@ -17,7 +17,7 @@ public class Plan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "plan_id")
-    private Long planId;
+    private Long id;
 
 //    @OneToOne(mappedBy = "plan", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //    private Checklist checklist;
@@ -35,6 +35,8 @@ public class Plan {
     private LocalDate endDate;
 
     private String type;
+
+    private String visibility;
 
     // 여행 계획 상태 (예: planned, completed, canceled)
     private String status;

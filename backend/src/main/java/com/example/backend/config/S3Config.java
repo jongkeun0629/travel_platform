@@ -15,10 +15,10 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class S3Config {
 
-    @Value("${AWS-ACCESS}")
+    @Value("${AWS_ACCESS_KEY_ID}")
     private String accessKey;
 
-    @Value("${AWS-SECRET}")
+    @Value("${AWS_SECRET_ACCESS_KEY}")
     private String secretKey;
 
     @Value("${AWS-REGION}")

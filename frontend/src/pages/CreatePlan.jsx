@@ -3,8 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { IoIosClose } from "react-icons/io";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import planService from "../services/plan";
+import useAuthStore from "../store/authStore";
 
-// 임시 데이터
 const cityData = [
   { id: 1, name: "서울" },
   { id: 2, name: "부산" },
@@ -26,16 +27,9 @@ const publicSettingOptions = [
   { id: 3, name: "비공개" },
 ];
 
-/**
- * CreatePlan 전체 페이지에서 사용될 수 있고,
- * TravelDetail에서 팝업(모달) 형태로 재사용될 수 있도록 props 기반으로 동작
- *
- * - initialData: (optional) 기존 여행 정보가 있다면 초기값으로 사용
- * - onCancel: (optional) 모달에서 닫기 시 호출
- * - onSave: (optional) 모달에서 저장 시 호출 (새로 만든/수정된 plan 객체 전달)
- */
 export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
   const navigate = useNavigate();
+  const currentUser = useAuthStore((s) => s.user);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCities, setSelectedCities] = useState([]);
@@ -44,6 +38,7 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
   const [selectedVisibility, setSelectedVisibility] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   // 초기값 채우기 (수정 모드용)
   useEffect(() => {
@@ -103,57 +98,73 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
     setEndDate(end);
   };
 
-  const handleComplete = () => {
+  // 폼 제출: 서버에 생성 요청만 수행
+  const handleComplete = async () => {
     if (
-      selectedCities.length > 0 &&
-      travelTitle.trim() !== "" &&
-      startDate &&
-      endDate &&
-      selectedType &&
-      selectedVisibility
+      selectedCities.length === 0 ||
+      travelTitle.trim() === "" ||
+      !startDate ||
+      !endDate ||
+      !selectedType ||
+      !selectedVisibility
     ) {
-      const selectedCityNames = cityData
-        .filter((c) => selectedCities.includes(c.id))
-        .map((c) => c.name);
+      alert("여행 제목, 도시, 기간, 타입, 공개 여부를 모두 입력해 주세요.");
+      return;
+    }
 
-      const user = JSON.parse(localStorage.getItem("currentUser"));
-      const username = user?.userId || "unknown";
+    const selectedCityNames = cityData
+      .filter((c) => selectedCities.includes(c.id))
+      .map((c) => c.name);
 
-      // 모달에서 사용될 때는 새로운 id 생성 로직을 그대로 쓰되,
-      // onSave 콜백이 있으면 그쪽으로 전달하고 navigate는 하지 않음
-      const lastId = parseInt(localStorage.getItem("lastTravelId") || "0", 10);
-      const newId = lastId + 1;
-      localStorage.setItem("lastTravelId", newId.toString());
+    // const username = currentUser?.username || currentUser?.email || "unknown";
 
-      const payload = {
-        id: initialData?.id ?? newId,
-        travelTitle,
-        selectedCities: selectedCityNames,
-        travelPeriod: { startDate, endDate },
-        travelType: travelTypeOptions.find((t) => t.id === selectedType)?.name,
-        visibility: publicSettingOptions.find(
-          (v) => v.id === selectedVisibility
-        )?.name,
-        author: initialData?.author || username,
-        travelData: initialData?.travelData || {
-          checklist: ["교통편", "숙소", "세면도구", "의류", "충전기"],
-          itinerary: [],
-          reservations: [],
-        },
-      };
+    const payload = {
+      title: travelTitle.trim(),
+      destination: selectedCityNames.join(","),
+      startDate:
+        startDate instanceof Date ? startDate.toISOString() : startDate,
+      endDate: endDate instanceof Date ? endDate.toISOString() : endDate,
 
+      type: travelTypeOptions.find((t) => t.id === selectedType)?.name,
+      visibility: publicSettingOptions.find((v) => v.id === selectedVisibility)
+        ?.name,
+    };
+
+    try {
+      setSaving(true);
       if (onSave) {
-        // 추가 기능: TravelDetail에서 수정/저장시에 onSave로 전달
         onSave(payload);
         if (onCancel) onCancel();
       } else {
-        // CreatePlan 페이지에서 새로 만드는 경우: navigate로 상세 페이지로 이동
-        navigate(`/traveldetail/${newId}`, {
-          state: payload,
-        });
+        const userId = currentUser?.id; // provided user object has id: 1
+        if (!userId) {
+          console.error("currentUser missing id:", currentUser);
+          alert("로그인된 사용자 ID를 찾을 수 없습니다.");
+          return;
+        }
+        const created = await planService.createPlan(payload, userId);
+        const newId = created.id ?? created.planId ?? null;
+        if (newId) {
+          navigate(`/traveldetail/${newId}`, { state: created });
+        } else {
+          navigate("/", { replace: true });
+        }
       }
-    } else {
-      alert("여행 제목, 도시, 기간, 타입, 공개 여부를 모두 입력해 주세요.");
+    } catch (err) {
+      console.error("Failed to create plan (backend):", err);
+      if (err?.response) {
+        console.error(
+          "status:",
+          err.response.status,
+          "data:",
+          err.response.data
+        );
+      }
+      alert(
+        "서버에 여행 계획을 저장하는 데 실패했습니다. 네트워크 또는 서버 상태를 확인하세요."
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -200,7 +211,7 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
           placeholder="예: 2025 제주 한 달 살기"
           value={travelTitle}
           onChange={(e) => setTravelTitle(e.target.value)}
-          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white"
         />
       </div>
 
@@ -215,7 +226,7 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
           placeholder="도시를 검색하세요"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white"
         />
       </div>
 
@@ -232,11 +243,11 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
                 id={`city-${city.id}`}
                 checked={selectedCities.includes(city.id)}
                 onChange={() => handleCityToggle(city.id)}
-                className="w-5 h-5 text-blue-500 rounded focus:ring-blue-500"
+                className="w-5 h-5 text-blue-500"
               />
               <label
                 htmlFor={`city-${city.id}`}
-                className="ml-3 text-lg font-medium cursor-pointer"
+                className="ml-3 text-lg font-medium"
               >
                 {city.name}
               </label>
@@ -256,11 +267,9 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
           selectsRange
           startDate={startDate}
           endDate={endDate}
-          onChange={handleDateChange}
+          onChange={(dates) => handleDateChange(dates)}
           dateFormat="yyyy-MM-dd"
-          placeholderText="날짜를 선택하세요"
-          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-center text-white placeholder-gray-400 focus:outline-none"
-          calendarClassName="bg-gray-800 text-white"
+          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800"
         />
       </div>
 
@@ -271,10 +280,8 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
           {travelTypeOptions.map((type) => (
             <label
               key={type.id}
-              className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition ${
-                selectedType === type.id
-                  ? "bg-blue-600 border-blue-400"
-                  : "bg-gray-800 border-gray-600 hover:bg-gray-700"
+              className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer ${
+                selectedType === type.id ? "bg-blue-600" : "bg-gray-800"
               }`}
             >
               <input
@@ -298,10 +305,10 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
           {publicSettingOptions.map((option) => (
             <label
               key={option.id}
-              className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition ${
+              className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer ${
                 selectedVisibility === option.id
-                  ? "bg-green-600 border-green-400"
-                  : "bg-gray-800 border-gray-600 hover:bg-gray-700"
+                  ? "bg-green-600"
+                  : "bg-gray-800"
               }`}
             >
               <input
@@ -321,20 +328,17 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
       {/* 완료 버튼 */}
       <button
         onClick={handleComplete}
-        disabled={!isFormValid}
-        className={`w-full p-4 text-xl font-bold rounded-lg transition-colors ${
-          isFormValid
-            ? "bg-blue-600 hover:bg-blue-700"
-            : "bg-gray-600 cursor-not-allowed"
+        disabled={!isFormValid || saving}
+        className={`w-full p-4 text-xl font-bold rounded-lg ${
+          isFormValid ? "bg-blue-600" : "bg-gray-600"
         }`}
       >
-        {onSave ? "저장" : "다음"}
+        {saving ? "저장 중..." : onSave ? "저장" : "다음"}
       </button>
     </div>
   );
 }
 
-// 기본 페이지로 쓰이는 CreatePlan 컴포넌트: 기존 동작 유지
 export default function CreatePlan() {
   return <CreatePlanForm initialData={null} />;
 }

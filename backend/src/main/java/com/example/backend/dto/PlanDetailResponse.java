@@ -22,7 +22,7 @@ public class PlanDetailResponse {
     public static PlanDetailResponse fromEntity(PlanDetail detail) {
         return PlanDetailResponse.builder()
                 .id(detail.getId())
-                .planId(detail.getPlan() != null ? detail.getPlan().getPlanId() : null)
+                .planId(detail.getPlan() != null ? detail.getPlan().getId() : null)
                 .placeId(detail.getPlace() != null ? detail.getPlace().getId() : null)
                 .tripday(detail.getTripday())
                 .reserveInfo(detail.getReserveInfo())
