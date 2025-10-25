@@ -44,8 +44,8 @@ public class PlaceReviewService {
         PlaceReview review = placeReviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("후기를 찾을 수 없습니다."));
 
-        review.setRating(review.getRating());
-        review.setContent(review.getContent());
+        review.setRating(request.getRating());
+        review.setContent(request.getContent());
 
         placeReviewRepository.save(review);
         return PlaceReviewResponse.fromEntity(review);
