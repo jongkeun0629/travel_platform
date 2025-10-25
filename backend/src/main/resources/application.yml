@@ -20,15 +20,15 @@ spring:
           starttls:
             enable: true
   security:
-  #    oauth2:
-  #      client:
-  #        registration:
-  #          google:
-  #            client-id: "${google-client-id}"
-  #            client-secret: "${google-secret}"
-  #            scope:
-  #              - email
-  #              - profile
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id: "${google-client-id}"
+#            client-secret: "${google-secret}"
+#            scope:
+#              - email
+#              - profile
   jpa:
     hibernate:
       ddl-auto: update
@@ -40,3 +40,10 @@ jwt:
   secret: "23bLwsCSUZf7Lw29r8PVpwOxTcHiTwp7l4EpEJuqBvg="
   expiration: 86400000
   refresh-expiration: 604800000
+aws:
+  s3:
+    bucket-name: "${AWS-BUCKET}"
+    region: "${AWS-REGION}"
+  credentials:
+    access-key: "${AWS-ACCESS}"
+    secret-key: "${AWS-SECRET}"

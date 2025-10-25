@@ -5,7 +5,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94501aff-1f81-4717-9229-4aa8ca7956be" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/config/S3Config.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/controller/S3Controller.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/controller/UserController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/dto/UserEditResponseRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/exception/ResourceNotFoundException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/security/JwtAuthenticationEntryPoint.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/security/JwtAuthenticationFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/service/AuthenticationService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/service/S3Service.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/layout/Navbar.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/profile/CheckBoxGroup.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/profile/FormInput.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/profile/TagList.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/hooks/useOutsideClick.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/backend/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/config/PasswordConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/config/PasswordConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/repository/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/backend/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/profile/ProfileEditForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/profile/ProfileEditForm.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/profile/ProfileView.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/profile/ProfileView.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/CreatePlan.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/CreatePlan.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/HomePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/ProfilePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/ProfilePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/StartPage.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/TravelDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/TravelDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/userService.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/userService.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,18 +82,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.BackendApplication.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.backend [:BackendApplication.main()].executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/reservation&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/home/IdeaProjects&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propCompiler&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.BackendApplication.executor": "Run",
+    "Gradle.backend [:BackendApplication.main()].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "Merging develop",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/home/IdeaProjects",
+    "settings.editor.selected.configurable": "project.propCompiler"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="travel-platfrom" />

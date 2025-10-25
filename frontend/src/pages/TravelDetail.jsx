@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import KakaoMapModal from "../components/Map/KakaoMapModal";
-
-/** ---------------------------
- *  유틸 함수들 (컴포넌트 바깥에 정의)
- *  - 재사용 가능, renderContent에서 접근 가능
- * ----------------------------*/
+import { FaRegEdit } from "react-icons/fa";
+import { CreatePlanForm } from "./CreatePlan"; // 추가: CreatePlanForm 재사용
 
 // 입력 타입 자동 판단
 const getInputType = (label) => {
@@ -46,23 +43,16 @@ const getReservationFields = (type) => {
   }
 };
 
-/** ---------------------------
- *  TravelDetail 컴포넌트
- * ----------------------------*/
 export default function TravelDetail() {
-  const { id } = useParams(); // URL에서 id 가져오기
+  const { id } = useParams();
   const location = useLocation();
 
-  // plan: travelPlans 에 저장되는 최상위 객체 (id, travelTitle, selectedCities, travelPeriod, author, travelData 등)
   const [plan, setPlan] = useState(null);
-
-  // travelData: 실제 체크리스트, itinerary, reservations 를 담음
   const [travelData, setTravelData] = useState({
     checklist: [],
     itinerary: [],
     reservations: [],
   });
-
   const [loading, setLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState("info");
 
@@ -81,18 +71,27 @@ export default function TravelDetail() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalField, setModalField] = useState("");
 
-  // 저장 유틸: plan 과 travelData를 합쳐 localStorage에 덮어쓰기 (중복 추가 방지)
+  // 수정용 modal (CreatePlanForm 재사용)
+  const [editInfoOpen, setEditInfoOpen] = useState(false);
+
+  // 일정/예약 편집 인덱스 및 임시 데이터
+  const [editingItineraryIndex, setEditingItineraryIndex] = useState(null);
+  const [editingItineraryData, setEditingItineraryData] = useState(null);
+  const [editingReservationIndex, setEditingReservationIndex] = useState(null);
+  const [editingReservationData, setEditingReservationData] = useState(null);
+
+  /* ------------------------------
+      저장/업데이트 유틸 함수
+  ------------------------------ */
   const saveToLocalStorage = (updatedPlan) => {
     const savedPlans = JSON.parse(localStorage.getItem("travelPlans") || "[]");
     const filtered = savedPlans.filter(
       (p) => Number(p.id) !== Number(updatedPlan.id)
     );
-    // 최신 항목을 배열 끝에 넣기
     const newArr = [...filtered, updatedPlan];
     localStorage.setItem("travelPlans", JSON.stringify(newArr));
   };
 
-  // plan 업데이트 + travelData 동기화 + 저장을 하나의 함수로 통일
   const updateAndSave = (updatedTravelData) => {
     const updatedPlan = {
       ...(plan || {}),
@@ -104,65 +103,67 @@ export default function TravelDetail() {
     saveToLocalStorage(updatedPlan);
   };
 
-  // 초기 로드: location.state 있으면 새로 생성된 여행으로 처리하고 localStorage에 저장,
-  // 없으면 localStorage에서 id로 찾아서 불러옴.
+  // 여행 기본 정보 수정 핸들러 (CreatePlanForm의 onSave으로 사용됨)
+  const handleUpdateInfo = (updated) => {
+    // updated는 CreatePlanForm에서 전달한 전체 plan 객체
+    const merged = { ...(plan || {}), ...updated };
+    setPlan(merged);
+    if (updated.travelData) setTravelData(updated.travelData);
+    saveToLocalStorage(merged);
+  };
+
+  /* ------------------------------
+      초기 로드
+  ------------------------------ */
   useEffect(() => {
     const savedPlans = JSON.parse(localStorage.getItem("travelPlans") || "[]");
 
     if (location.state && location.state.id) {
-      // CreatePlan에서 navigate로 전달된 state (새로 만든 여행)
       const newPlan = {
         id: location.state.id,
         travelTitle: location.state.travelTitle,
         selectedCities: location.state.selectedCities || [],
         travelPeriod: location.state.travelPeriod,
         author: location.state.author,
+        travelType: location.state.travelType || "일반 여행",
+        visibility: location.state.visibility || "전체 공개",
         travelData: location.state.travelData || {
           checklist: ["교통편", "숙소", "세면도구", "의류", "충전기"],
           itinerary: [],
           reservations: [],
         },
       };
+      // 체크리스트가 문자열로 되어 있으면 객체로 변환 (체크 상태 포함)
+      newPlan.travelData.checklist = (newPlan.travelData.checklist || []).map(
+        (it) => (typeof it === "string" ? { text: it, checked: false } : it)
+      );
       setPlan(newPlan);
       setTravelData(newPlan.travelData);
-      saveToLocalStorage(newPlan); // 한 번만 저장
+      saveToLocalStorage(newPlan);
     } else {
-      // 기존 여행 불러오기 (홈에서 보기 클릭)
       const existing = savedPlans.find((p) => Number(p.id) === Number(id));
       if (existing) {
-        setPlan(existing);
-        setTravelData(
-          existing.travelData || {
-            checklist: ["교통편", "숙소", "세면도구", "의류", "충전기"],
-            itinerary: [],
-            reservations: [],
-          }
-        );
-      } else {
-        // id로도 찾을 수 없는 경우: 빈 플랜 생성
-        setPlan({
-          id,
-          travelTitle: "알 수 없는 여행",
-          selectedCities: [],
-          travelPeriod: null,
-          author: null,
-          travelData: {
-            checklist: ["교통편", "숙소", "세면도구", "의류", "충전기"],
-            itinerary: [],
-            reservations: [],
-          },
-        });
-        setTravelData({
-          checklist: ["교통편", "숙소", "세면도구", "의류", "충전기"],
+        // 기존 저장된 체크리스트 항목이 문자열 배열이면 객체로 변환
+        existing.travelData = existing.travelData || {
+          checklist: [],
           itinerary: [],
           reservations: [],
-        });
+        };
+        existing.travelData.checklist = (
+          existing.travelData.checklist || []
+        ).map((it) =>
+          typeof it === "string" ? { text: it, checked: false } : it
+        );
+        setPlan(existing);
+        setTravelData(existing.travelData);
       }
     }
     setLoading(false);
   }, [id]);
 
-  // 카카오맵 모달/검색 관련
+  /* ------------------------------
+      모달(카카오맵) 관련
+  ------------------------------ */
   const handleOpenModal = (field) => {
     setModalField(field);
     setModalOpen(true);
@@ -170,10 +171,8 @@ export default function TravelDetail() {
 
   const handleSelectPlace = ({ address, phone, place_name }) => {
     if (modalField === "place") {
-      // 일정의 place 입력
       setNewPlan((prev) => ({ ...prev, place: place_name }));
     } else {
-      // 예약 항목에서 주소/전화/이름 채우기
       setNewReservation((prev) => {
         const field = modalField;
         let value = "";
@@ -186,60 +185,52 @@ export default function TravelDetail() {
     setModalOpen(false);
   };
 
-  // 카카오 주소 검색(간단)
-  const openKakaoAddressSearch = (fieldName) => {
-    if (!window.kakao || !window.kakao.maps) {
-      alert("카카오맵 SDK가 로드되지 않았습니다.");
-      return;
-    }
-    const ps = new window.kakao.maps.services.Places();
-    const keyword = prompt("검색할 장소를 입력하세요:");
-    if (!keyword) return;
-    ps.keywordSearch(keyword, (data, status) => {
-      if (status === window.kakao.maps.services.Status.OK) {
-        const place = data[0];
-        const address = place.address_name || place.road_address_name;
-        const phone = place.phone || "";
-        setNewReservation((prev) => ({
-          ...prev,
-          ...(fieldName.includes("주소") ? { [fieldName]: address } : {}),
-          ...(fieldName.includes("전화") ? { [fieldName]: phone } : {}),
-        }));
-        alert(`📍 ${place.place_name}\n주소: ${address}\n전화번호: ${phone}`);
-      } else {
-        alert("검색 결과를 찾을 수 없습니다.");
-      }
-    });
-  };
-
   const openKakaoMap = (place) => {
     const url = `https://map.kakao.com/?q=${encodeURIComponent(place)}`;
     window.open(url, "_blank");
   };
 
-  // 핸들러들 (모두 const로 정리, updateAndSave 사용)
+  /* ------------------------------
+      체크리스트 핸들러 (체크박스 상태 저장 포함)
+  ------------------------------ */
   const handleAddChecklist = () => {
-    const text = newChecklist?.trim();
-    if (!text) return;
+    if (!newChecklist.trim()) return;
     const updated = {
       ...travelData,
-      checklist: [...(travelData.checklist || []), text],
+      checklist: [
+        ...(travelData.checklist || []),
+        { text: newChecklist.trim(), checked: false },
+      ],
     };
     updateAndSave(updated);
     setNewChecklist("");
   };
 
-  const handleRemoveChecklist = (index) => {
+  const handleRemoveChecklist = (i) => {
     const updated = {
       ...travelData,
-      checklist: (travelData.checklist || []).filter((_, i) => i !== index),
+      checklist: travelData.checklist.filter((_, idx) => idx !== i),
     };
     updateAndSave(updated);
   };
 
+  // 추가 기능: 체크박스 클릭해서 완료 여부 저장
+  const handleToggleChecklist = (i) => {
+    const updated = {
+      ...travelData,
+      checklist: travelData.checklist.map((item, idx) =>
+        idx === i ? { ...item, checked: !item.checked } : item
+      ),
+    };
+    updateAndSave(updated);
+  };
+
+  /* ------------------------------
+      일정 핸들러 (추가 / 삭제 / 편집)
+  ------------------------------ */
   const handleAddPlan = () => {
     if (!newPlan.date || !newPlan.time || !newPlan.content) {
-      alert("날짜, 시간, 내용을 모두 입력해 주세요.");
+      alert("날짜, 시간, 내용을 모두 입력하세요.");
       return;
     }
     const updated = {
@@ -250,24 +241,44 @@ export default function TravelDetail() {
     setNewPlan({ date: "", time: "", place: "", content: "" });
   };
 
-  const handleRemovePlan = (index) => {
+  const handleRemovePlan = (i) => {
     const updated = {
       ...travelData,
-      itinerary: (travelData.itinerary || []).filter((_, i) => i !== index),
+      itinerary: travelData.itinerary.filter((_, idx) => idx !== i),
     };
     updateAndSave(updated);
   };
 
+  // 추가 기능: 일정 편집 시작
+  const startEditItinerary = (i) => {
+    setEditingItineraryIndex(i);
+    setEditingItineraryData(travelData.itinerary[i]);
+    // 포커스 등을 위해 해당 탭으로 이동
+    setSelectedMenu("itinerary");
+  };
+
+  const saveEditItinerary = () => {
+    if (editingItineraryIndex === null) return;
+    const updatedItinerary = travelData.itinerary.map((it, idx) =>
+      idx === editingItineraryIndex ? editingItineraryData : it
+    );
+    const updated = { ...travelData, itinerary: updatedItinerary };
+    updateAndSave(updated);
+    setEditingItineraryIndex(null);
+    setEditingItineraryData(null);
+  };
+
+  /* ------------------------------
+      예약 핸들러 (추가 / 삭제 / 편집)
+  ------------------------------ */
   const handleAddReservation = () => {
     const fields = getReservationFields(reservationType);
-    // required check: (간단히) 필드가 비어있지 않은지 확인
-    const missing = fields.some((f) => {
-      if (f === "메모") return false; // 메모는 선택
-      const val = newReservation[f];
-      return !val || String(val).trim() === "";
-    });
+    const missing = fields.some(
+      (f) =>
+        f !== "메모" && (!newReservation[f] || newReservation[f].trim() === "")
+    );
     if (missing) {
-      alert("예약의 필수 항목을 모두 입력해 주세요.");
+      alert("필수 항목을 모두 입력하세요.");
       return;
     }
     const updated = {
@@ -281,40 +292,52 @@ export default function TravelDetail() {
     setNewReservation({});
   };
 
-  const handleRemoveReservation = (index) => {
+  const handleRemoveReservation = (i) => {
     const updated = {
       ...travelData,
-      reservations: (travelData.reservations || []).filter(
-        (_, i) => i !== index
-      ),
+      reservations: travelData.reservations.filter((_, idx) => idx !== i),
     };
     updateAndSave(updated);
   };
 
-  // 로딩/없음 처리
-  if (loading)
-    return <div className="text-center p-8 text-gray-400">로딩 중...</div>;
-  if (!plan)
-    return (
-      <div className="text-center p-8 text-gray-400">
-        해당 여행 계획을 찾을 수 없습니다.
-      </div>
-    );
+  const startEditReservation = (i) => {
+    setEditingReservationIndex(i);
+    setEditingReservationData(travelData.reservations[i]);
+    setSelectedMenu("reservations");
+  };
 
-  // renderContent 함수: 탭별 렌더링 (getReservationFields/getInputType는 상단에서 정의됨)
+  const saveEditReservation = () => {
+    if (editingReservationIndex === null) return;
+    const updatedReservations = travelData.reservations.map((it, idx) =>
+      idx === editingReservationIndex ? editingReservationData : it
+    );
+    const updated = { ...travelData, reservations: updatedReservations };
+    updateAndSave(updated);
+    setEditingReservationIndex(null);
+    setEditingReservationData(null);
+  };
+
+  /* ------------------------------
+      렌더링
+  ------------------------------ */
+  if (loading) return <div className="p-8 text-gray-400">로딩 중...</div>;
+  if (!plan)
+    return <div className="p-8 text-gray-400">계획을 찾을 수 없습니다.</div>;
+
   const renderContent = () => {
     switch (selectedMenu) {
       case "info":
         return (
           <div>
             <h2 className="text-3xl font-bold mb-4">🧭 여행 정보</h2>
+
             <p className="mb-2 text-lg">
               작성자: {plan.author || "알 수 없음"}
             </p>
             <p className="mb-2 text-lg">
               여행 도시: {(plan.selectedCities || []).join(", ") || "미정"}
             </p>
-            <p className="mb-6 text-lg">
+            <p className="mb-2 text-lg">
               여행 기간:{" "}
               {plan.travelPeriod
                 ? `${new Date(
@@ -324,23 +347,36 @@ export default function TravelDetail() {
                   ).toLocaleDateString()}`
                 : "미정"}
             </p>
+            <p className="mb-2 text-lg">여행 타입: {plan.travelType}</p>
+            <p className="mb-2 text-lg">공개 여부: {plan.visibility}</p>
+            {/* 추가 기능: 현재 여행 정보 가지고 CreatePlanForm 팝업으로 열기 */}
+            <button
+              onClick={() => setEditInfoOpen(true)}
+              className="bg-gray-800 hover:bg-gray-700 mt-4 px-4 py-2 rounded-lg text-lg"
+            >
+              수정
+            </button>
+
+            {/* 팝업으로 CreatePlanForm 재사용 */}
+            {editInfoOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
+                <div className="w-full max-w-3xl bg-gray-900 rounded-lg overflow-auto max-h-[90vh]">
+                  <CreatePlanForm
+                    initialData={plan}
+                    onCancel={() => setEditInfoOpen(false)}
+                    onSave={(updated) => handleUpdateInfo(updated)}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         );
 
       case "checklist": {
-        const sampleChecklist = [
-          "교통편",
-          "숙소",
-          "세면도구",
-          "의류",
-          "보조배터리",
-          "충전기",
-          "상비약",
-        ];
         const checklistItems =
           travelData.checklist && travelData.checklist.length
             ? travelData.checklist
-            : sampleChecklist;
+            : [];
 
         return (
           <div>
@@ -367,7 +403,22 @@ export default function TravelDetail() {
                   key={index}
                   className="flex justify-between items-center bg-gray-800 p-3 mb-2 rounded-lg shadow-md text-lg"
                 >
-                  <span>{item}</span>
+                  <div className="flex items-center gap-5">
+                    {/* 추가 기능: 체크박스 on/off 값 저장(ischecked) */}
+                    <input
+                      type="checkbox"
+                      checked={item.checked}
+                      onChange={() => handleToggleChecklist(index)}
+                      className="w-5 h-5"
+                    />
+                    <span
+                      className={`${
+                        item.checked ? "line-through text-gray-400" : ""
+                      }`}
+                    >
+                      {item.text}
+                    </span>
+                  </div>
                   <button
                     onClick={() => handleRemoveChecklist(index)}
                     className="text-red-400 hover:text-red-500 text-xl"
@@ -391,9 +442,18 @@ export default function TravelDetail() {
                 <p className="text-gray-300 mb-4">📅 날짜를 선택하세요</p>
                 <input
                   type="date"
-                  value={newPlan.date}
+                  value={
+                    editingItineraryIndex !== null
+                      ? editingItineraryData?.date || ""
+                      : newPlan.date
+                  }
                   onChange={(e) =>
-                    setNewPlan({ ...newPlan, date: e.target.value })
+                    editingItineraryIndex !== null
+                      ? setEditingItineraryData({
+                          ...editingItineraryData,
+                          date: e.target.value,
+                        })
+                      : setNewPlan({ ...newPlan, date: e.target.value })
                   }
                   className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
                 />
@@ -403,9 +463,18 @@ export default function TravelDetail() {
                 <p className="text-gray-300 mb-4">🕒 시간을 선택하세요</p>
                 <input
                   type="time"
-                  value={newPlan.time}
+                  value={
+                    editingItineraryIndex !== null
+                      ? editingItineraryData?.time || ""
+                      : newPlan.time
+                  }
                   onChange={(e) =>
-                    setNewPlan({ ...newPlan, time: e.target.value })
+                    editingItineraryIndex !== null
+                      ? setEditingItineraryData({
+                          ...editingItineraryData,
+                          time: e.target.value,
+                        })
+                      : setNewPlan({ ...newPlan, time: e.target.value })
                   }
                   className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
                 />
@@ -416,9 +485,18 @@ export default function TravelDetail() {
                 <div className="flex">
                   <input
                     placeholder="장소"
-                    value={newPlan.place}
+                    value={
+                      editingItineraryIndex !== null
+                        ? editingItineraryData?.place || ""
+                        : newPlan.place
+                    }
                     onChange={(e) =>
-                      setNewPlan({ ...newPlan, place: e.target.value })
+                      editingItineraryIndex !== null
+                        ? setEditingItineraryData({
+                            ...editingItineraryData,
+                            place: e.target.value,
+                          })
+                        : setNewPlan({ ...newPlan, place: e.target.value })
                     }
                     className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full mr-2"
                   />
@@ -435,9 +513,18 @@ export default function TravelDetail() {
                 <p className="text-gray-300 mb-4">✏️ 내용을 작성하세요</p>
                 <input
                   placeholder="내용"
-                  value={newPlan.content}
+                  value={
+                    editingItineraryIndex !== null
+                      ? editingItineraryData?.content || ""
+                      : newPlan.content
+                  }
                   onChange={(e) =>
-                    setNewPlan({ ...newPlan, content: e.target.value })
+                    editingItineraryIndex !== null
+                      ? setEditingItineraryData({
+                          ...editingItineraryData,
+                          content: e.target.value,
+                        })
+                      : setNewPlan({ ...newPlan, content: e.target.value })
                   }
                   className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
                 />
@@ -445,12 +532,32 @@ export default function TravelDetail() {
             </div>
 
             <div className="flex justify-center mb-8">
-              <button
-                onClick={handleAddPlan}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold"
-              >
-                일정 추가
-              </button>
+              {editingItineraryIndex !== null ? (
+                <>
+                  <button
+                    onClick={saveEditItinerary}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mr-3"
+                  >
+                    수정 저장
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingItineraryIndex(null);
+                      setEditingItineraryData(null);
+                    }}
+                    className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-lg font-semibold"
+                  >
+                    취소
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={handleAddPlan}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold"
+                >
+                  일정 추가
+                </button>
+              )}
             </div>
 
             {(travelData.itinerary || []).length === 0 ? (
@@ -462,20 +569,27 @@ export default function TravelDetail() {
                   className="bg-gray-800 p-4 rounded-lg mb-3 shadow-md flex justify-between items-center hover:shadow-lg transition"
                 >
                   <div>
-                    <p className="font-semibold text-xl">
+                    <p className="font-semibold text-xl mb-2">
                       {p.date} {p.time}
                     </p>
-                    <p>{p.content}</p>
-                  </div>
-                  <div>
                     {p.place && (
                       <button
                         onClick={() => openKakaoMap(p.place)}
-                        className="text-blue-400 hover:underline mr-5"
+                        className="text-blue-400 hover:underline mb-2 text-xl"
                       >
                         📍 {p.place}
                       </button>
                     )}
+                    <p>{p.content}</p>
+                  </div>
+                  <div>
+                    {/* 추가 기능: 클릭 시 현재 일정 내용 수정(날짜, 시간, 장소, 내용) */}
+                    <button
+                      onClick={() => startEditItinerary(idx)}
+                      className="mr-5 text-xl"
+                    >
+                      <FaRegEdit />
+                    </button>
                     <button
                       onClick={() => handleRemovePlan(idx)}
                       className="text-red-400 hover:text-red-500 text-xl"
@@ -520,18 +634,28 @@ export default function TravelDetail() {
                   f.includes("주소") ||
                   f.includes("전화") ||
                   ["출발지", "도착지", "숙소이름", "식당이름"].includes(f);
+                const currentValue =
+                  editingReservationIndex !== null
+                    ? editingReservationData?.[f] || ""
+                    : newReservation[f] || "";
                 return (
                   <div key={f} className="flex gap-2 mb-2">
                     <input
                       type={type}
                       placeholder={f}
-                      value={newReservation[f] || ""}
-                      onChange={(e) =>
-                        setNewReservation({
-                          ...newReservation,
-                          [f]: e.target.value,
-                        })
-                      }
+                      value={currentValue}
+                      onChange={(e) => {
+                        if (editingReservationIndex !== null)
+                          setEditingReservationData({
+                            ...editingReservationData,
+                            [f]: e.target.value,
+                          });
+                        else
+                          setNewReservation({
+                            ...newReservation,
+                            [f]: e.target.value,
+                          });
+                      }}
                       className="bg-gray-900 border border-gray-700 p-2 rounded-lg w-full"
                     />
                     {isSearchable && (
@@ -548,12 +672,32 @@ export default function TravelDetail() {
             </div>
 
             <div className="flex justify-center mb-8">
-              <button
-                onClick={handleAddReservation}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold"
-              >
-                예약 추가
-              </button>
+              {editingReservationIndex !== null ? (
+                <>
+                  <button
+                    onClick={saveEditReservation}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mr-3"
+                  >
+                    수정 저장
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingReservationIndex(null);
+                      setEditingReservationData(null);
+                    }}
+                    className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-lg font-semibold"
+                  >
+                    취소
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={handleAddReservation}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold"
+                >
+                  예약 추가
+                </button>
+              )}
             </div>
 
             {(travelData.reservations || []).length === 0 ? (
@@ -577,12 +721,21 @@ export default function TravelDetail() {
                         )
                     )}
                   </div>
-                  <button
-                    onClick={() => handleRemoveReservation(idx)}
-                    className="text-red-400 hover:text-red-500 text-xl"
-                  >
-                    ✕
-                  </button>
+                  <div className="flex items-center">
+                    {/* 추가 기능: 클릭 시 현재 예약 내용 수정(예약 유형(교통, 숙소, 음식점)에 따른 정보) */}
+                    <button
+                      onClick={() => startEditReservation(idx)}
+                      className="mr-5 text-xl"
+                    >
+                      <FaRegEdit />
+                    </button>
+                    <button
+                      onClick={() => handleRemoveReservation(idx)}
+                      className="text-red-400 hover:text-red-500 text-xl"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -595,7 +748,6 @@ export default function TravelDetail() {
     }
   };
 
-  // 컴포넌트 렌더
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
       <div className="flex justify-between items-center mb-6">
