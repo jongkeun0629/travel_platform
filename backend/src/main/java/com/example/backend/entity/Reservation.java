@@ -1,10 +1,7 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -16,6 +13,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Reservation {
 
     @Id
@@ -25,6 +23,10 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_detail_id", nullable = false)
     private PlanDetail planDetail;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "place_id")
+    private Place place;
 
     @Column(nullable = false)
     private String type;       // 교통, 식당, 숙소 타입
@@ -36,7 +38,6 @@ public class Reservation {
     private String endLocation;
     private String seat;
 
-    //공통
     private String address;
     private String call;
     private String reservationNo;
