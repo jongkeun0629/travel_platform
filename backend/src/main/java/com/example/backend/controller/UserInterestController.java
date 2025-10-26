@@ -1,4 +1,3 @@
-// src/main/java/com/example/backend/controller/UserInterestController.java
 package com.example.backend.controller;
 
 import com.example.backend.dto.InterestRequestDto;
@@ -29,4 +28,14 @@ public class UserInterestController {
         InterestResponseDto response = userInterestService.updateUserInterests(userId, requestDto);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{interestName}")
+    public ResponseEntity<InterestResponseDto> removeUserInterest(
+            @PathVariable Long userId,
+            @PathVariable String interestName
+    ) {
+        InterestResponseDto response = userInterestService.removeUserInterest(userId, interestName);
+        return ResponseEntity.ok(response);
+    }
+
 }
