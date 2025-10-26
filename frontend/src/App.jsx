@@ -6,6 +6,8 @@ import CreatePlan from "./pages/CreatePlan";
 import RegisterPage from "./pages/RegisterPage";
 import NotFound from "./pages/NotFound";
 import TravelDetail from "./pages/TravelDetail";
+import TripReviewPage from "./pages/TripReviewPage";
+import PlaceReviewPage from "./pages/PlaceReviewPage";
 
 export default function App() {
   return (
@@ -19,6 +21,8 @@ export default function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/startpage" element={<StartPage />} />
             <Route path="/createplan" element={<CreatePlan />} />
+            <Route path="/trip-reviews" element={<TripReviewPage />} />
+            <Route path="/place-reviews" element={<PlaceReviewPage />} />
             <Route path="/" element={<HomePage />} />
             {/* /travel/:id */}
             <Route path="/traveldetail" element={<TravelDetail />} />
