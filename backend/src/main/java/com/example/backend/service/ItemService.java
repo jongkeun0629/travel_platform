@@ -44,13 +44,14 @@ public class ItemService {
     }
 
     @Transactional
-    public void add(Long planId, ItemRequest request){
-        itemRepository.findByPlan_IdAndName(planId, request.getName()).ifPresent(item -> {throw new IllegalArgumentException("동일한 항목이 존재합니다.");});//PlanPlanId인 이유- Plan객체내ㅐ에서 planId를 찾기 때문에
+    public ItemResponse add(Long planId, ItemRequest request){
+        itemRepository.findByPlan_IdAndName(planId, request.getName()).ifPresent(item -> {throw new IllegalArgumentException("동일한 항목이 존재합니다.");});
         Item newItem = Item.builder()
                         .name(request.getName())
                 .plan(planRepository.findById(planId).get())
                                 .build();
-        itemRepository.save(newItem);
+        Item savedItem = itemRepository.save(newItem);  // 반환값 저장
+        return ItemResponse.fromEntity(savedItem);  // ItemResponse 반환
     }
 
     @Transactional

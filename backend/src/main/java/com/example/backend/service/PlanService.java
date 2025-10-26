@@ -81,7 +81,7 @@ public class PlanService {
         return planRepository.countByUserIdAndNotDeleted(userId);
     }
 
-    public Plan updatedPlan(Long planId, PlanRequest request) {
+        public Plan updatedPlan(Long planId, PlanRequest request) {
         Plan plan = getPlanById(planId);
 
         plan.setTitle(request.getTitle());
@@ -89,6 +89,7 @@ public class PlanService {
         plan.setStartDate(request.getStartDate());
         plan.setEndDate(request.getEndDate());
         plan.setType(request.getType());
+        plan.setVisibility(request.getVisibility());
         plan.setUpdatedAt(LocalDateTime.now());
 
         return planRepository.save(plan);
