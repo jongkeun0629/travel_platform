@@ -16,6 +16,8 @@ import OAuthRedirectHandler from "./pages/OAuthRedirectHandler";
 import Navbar from "./components/layout/Navbar";
 import { useEffect } from "react";
 import useAuthStore from "./store/authStore";
+import TripReviewPage from "./pages/TripReviewPage";
+import PlaceReviewPage from "./pages/PlaceReviewPage";
 
 function AppLayout() {
   const user = useAuthStore((state) => state.user);
@@ -58,6 +60,8 @@ export default function App() {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/createplan" element={<CreatePlan />} />
               <Route path="/" element={<HomePage />} />
+              <Route path="/trip-reviews" element={<TripReviewPage />} />
+              <Route path="/place-reviews" element={<PlaceReviewPage />} />
               <Route path="/traveldetail/:id" element={<TravelDetail />} />
               <Route path="*" element={<NotFound />} />
             </Route>
