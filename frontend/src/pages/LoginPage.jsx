@@ -89,6 +89,14 @@ export default function LoginPage() {
             {loading ? "로그인 중..." : "로그인"}
           </button>
         </form>
+        <div>
+          <a href="http://localhost:8080/oauth2/authorization/google">
+            <button>구글로 로그인</button>
+          </a>
+          <a href="http://localhost:8080/oauth2/authorization/kakao">
+            <button>카카오로 로그인</button>
+          </a>
+        </div>
 
         {error && (
           <p className="text-red-500 text-xs text-center mt-4">{error}</p>
