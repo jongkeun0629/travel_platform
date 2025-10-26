@@ -1,60 +1,33 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { userService } from "../services/userService";
 import ProfileEditForm from "../components/profile/ProfileEditForm";
 import ProfileView from "../components/profile/ProfileView";
-
-const PROFILES_KEY = "travel_profiles";
-
-const getProfileData = (user) => {
-    if (!user) return null;
-
-    const defaultProfile = {
-        userId: user.userId,
-        email: user.email,
-        introduction: "",
-        profileImageUrl: null,
-        interests: [],
-        birthdate: '',
-        stats: {
-            plans: 0,
-            reviews: 0,
-        }
-    };
-
-    const allProfiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
-    const userProfile = allProfiles[user.userId];
-
-    if (userProfile) {
-        return {
-            ...defaultProfile,
-            ...userProfile
-        };
-    }
-
-    return defaultProfile;
-};
+import useAuthStore from "../store/authStore";
+import profileService from "../services/profile";
+import StorageService from "../services/storage";
 
 export default function ProfilePage() {
-    const navigate = useNavigate();
-
     const [isEditing, setIsEditing] = useState(false);
     const [profileData, setProfileData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [user, setUser] = useState(null);
+
+    const updateAuthUser = useAuthStore((state) => state.updateUser);
+    const userEmail = useAuthStore((state) => state.user?.email);
 
     useEffect(() => {
-        const currentUser = userService.getCurrentUser();
-        if (!currentUser) {
-            setIsLoading(false);
-            navigate("/login", { replace: true });
-        } else {
-            setUser(currentUser);
-            const data = getProfileData(currentUser);
-            setProfileData(data);
-            setIsLoading(false);
-        }
-    }, [navigate]);
+        const fetchProfile = async () => {
+            setIsLoading(true);
+            try {
+                const response = await profileService.getProfile();
+                setProfileData(response.data);
+            } catch (error) {
+                console.error("프로필 정보를 불러오는데 실패했습니다.", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, []);
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -64,31 +37,34 @@ export default function ProfilePage() {
         setIsEditing(false);
     };
 
-    const handleSaveProfile = (updatedData) => {
-        if (!user) return;
+    const handleSaveProfile = async (updatedDataFromForm) => {
+        const requestDto = {
+            username: updatedDataFromForm.username,
+            introduction: updatedDataFromForm.introduction,
+            email: userEmail,
+            interests: updatedDataFromForm.interests,
+        };
 
         try {
-            const authUpdate = {
-                userId: updatedData.userId,
-                email: updatedData.email
-            };
+            const response = await profileService.updateProfile(requestDto);
+            const updatedProfileFromServer = response.data;
 
-            userService.updateUser(user.userId, authUpdate);
-
-            const allProfiles = JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
-
-            if (user.userId !== updatedData.userId) {
-                delete allProfiles[user.userId];
+            if (updatedProfileFromServer.access_token && updatedProfileFromServer.refresh_token) {
+                StorageService.setAccessToken(updatedProfileFromServer.access_token);
+                StorageService.setRefreshToken(updatedProfileFromServer.refresh_token);
             }
 
-            allProfiles[updatedData.userId] = updatedData;
-            localStorage.setItem(PROFILES_KEY, JSON.stringify(allProfiles));
+            setProfileData(updatedProfileFromServer);
+            updateAuthUser({
+                username: updatedProfileFromServer.username,
+                introduction: updatedProfileFromServer.introduction
+            });
 
-            setProfileData(updatedData);
-            setUser(authUpdate);
             setIsEditing(false);
+            alert("프로필이 수정되었습니다.");
         } catch (err) {
-            alert(err.message);
+            console.error("프로필 수정 실패:", err);
+            alert(err.response?.data?.message || "프로필 수정 중 오류가 발생했습니다.");
         }
     };
 

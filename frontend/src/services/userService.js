@@ -1,4 +1,4 @@
-const USER_KEY = "currentUser";
+const USER_KEY = "user";
 const USERS_KEY = "users";
 
 export const userService = {
