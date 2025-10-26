@@ -22,7 +22,6 @@ const useAuthStore = create((set) => ({
       });
       return true; 
     } else {
-      // 토큰이 누락되었을 경우 초기화 (안전 장치)
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
