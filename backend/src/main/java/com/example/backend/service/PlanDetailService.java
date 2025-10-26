@@ -89,16 +89,23 @@ public class PlanDetailService {
 
     private Place toPlace(PlaceRequest pr) {
         return Place.builder()
-                .placeName(pr.getPlaceName())
-                .address(pr.getAddress())
-                .call(pr.getCall())
-                .classification(pr.getClassification())
-                .kakaoPlaceId(pr.getKakaoPlaceId())
-                .build();
+            .placeName(pr.getPlaceName() != null ? pr.getPlaceName() : "장소명 없음")
+            .address(pr.getAddress() != null ? pr.getAddress() : "")  // 빈 문자열로 설정
+            .call(pr.getCall())
+            .classification(pr.getClassification())
+            .kakaoPlaceId(pr.getKakaoPlaceId())
+            .build();
     }
 
     public List<PlanDetail> getPlanDetailsByPlanId(Long planId) {
-        return planDetailRepository.findByPlan_Id(planId);
+        List<PlanDetail> details = planDetailRepository.findByPlan_Id(planId);
+        details.forEach(detail -> {
+            if (detail.getPlace() != null) {
+                // lazy loading 해제
+                detail.getPlace().getPlaceName();
+            }
+        });
+        return details;
     }
 
     public PlanDetail getPlanDetailById(Long detailId) {

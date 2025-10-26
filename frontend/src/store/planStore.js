@@ -18,7 +18,7 @@ const usePlanStore = create((set) => ({
       if (!userId) {
         throw new Error("로그인이 필요합니다.");
       }
-      const newPlan = await planService.createPlan(planData);
+      const newPlan = await planService.createPlan(planData, userId);
       set((state) => ({
         plans: [newPlan, ...state.plans],
         loading: false,

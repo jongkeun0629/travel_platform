@@ -1,7 +1,9 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -9,12 +11,13 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reservation")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "type") // 타입 구분용 컬럼
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Reservation {
+@SuperBuilder // 자식 클래스에서 빌더를 상속받도록 설정
+public abstract class Reservation { // 추상 클래스로 선언
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,29 +25,19 @@ public class Reservation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_detail_id", nullable = false)
+    @JsonBackReference
     private PlanDetail planDetail;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id")
     private Place place;
 
-    @Column(nullable = false)
-    private String type;       // 교통, 식당, 숙소 타입
+    @Column(name = "type", insertable = false, updatable = false)
+    private String type;
 
-    private String name;       // 교통편명/ 식당명/ 숙소명
-
-    //교통용
-    private String startLocation;
-    private String endLocation;
-    private String seat;
-
-    private String address;
-    private String call;
+    private String name;
     private String reservationNo;
     private String memo;
-
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -1,20 +1,14 @@
 package com.example.backend.dto;
 
 import lombok.Data;
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
+@SuperBuilder // 빌더 패턴을 상속받을 수 있도록 설정
+@NoArgsConstructor // Lombok을 위한 기본 생성자
 public class ReservationRequest {
     private Long planDetailId;
     private String type;
-
-    private String reservationNo;
-    private String name;
-    private String memo;
-    private String seat;
-
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-
     private PlaceRequest place;
 }
