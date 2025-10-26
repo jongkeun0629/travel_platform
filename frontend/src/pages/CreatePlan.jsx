@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import planService from "../services/plan";
 import useAuthStore from "../store/authStore";
+import usePlanStore from "../store/planStore";
 
 const cityData = [
   { id: 1, name: "서울" },
@@ -39,6 +40,7 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [saving, setSaving] = useState(false);
+  const createPlan = usePlanStore((s) => s.createPlan);
 
   // 초기값 채우기 (수정 모드용)
   useEffect(() => {
@@ -136,13 +138,7 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
         onSave(payload);
         if (onCancel) onCancel();
       } else {
-        const userId = currentUser?.id; // provided user object has id: 1
-        if (!userId) {
-          console.error("currentUser missing id:", currentUser);
-          alert("로그인된 사용자 ID를 찾을 수 없습니다.");
-          return;
-        }
-        const created = await planService.createPlan(payload, userId);
+        const created = await createPlan(payload);
         const newId = created.id ?? created.planId ?? null;
         if (newId) {
           navigate(`/traveldetail/${newId}`, { state: created });

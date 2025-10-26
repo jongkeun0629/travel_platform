@@ -69,12 +69,17 @@ public class ItemService {
     }
 
     @Transactional
-    public void toggleCheck(Long planId, Long id){
-        Item item = itemRepository.findById(id).get();
+    public ItemResponse toggleCheck(Long planId, Long id){
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("아이템을 찾을 수 없습니다."));
+
         if(item.getPlan().getId().equals(planId)) {
-            item.setChecked(true);
+            item.setChecked(!item.isChecked()); // ✅ 토글 처리
+            itemRepository.save(item);
+            return ItemResponse.fromEntity(item); // ✅ 업데이트된 아이템 반환
         }
-        itemRepository.save(item);
+
+        throw new IllegalArgumentException("권한이 없습니다.");
     }
 
 }

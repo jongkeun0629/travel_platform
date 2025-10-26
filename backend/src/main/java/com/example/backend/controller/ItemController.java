@@ -36,8 +36,8 @@ public class ItemController {
         return ResponseEntity.ok(responseList);
     }
     @PatchMapping("/{itemId}")
-    public ResponseEntity<String> toggleCheck(@PathVariable Long planId, @PathVariable Long itemId){
-        itemService.toggleCheck(planId, itemId);
-        return ResponseEntity.status(201).body("check toggled successfully.");
+    public ResponseEntity<ItemResponse> toggleCheck(@PathVariable Long planId, @PathVariable Long itemId){
+        ItemResponse itemResponse = itemService.toggleCheck(planId, itemId);
+        return ResponseEntity.ok(itemResponse);
     }
 }
