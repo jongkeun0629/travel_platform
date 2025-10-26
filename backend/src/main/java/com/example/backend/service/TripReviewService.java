@@ -10,6 +10,7 @@ import com.example.backend.repository.TripReviewRepository;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ public class TripReviewService {
     private final TripReviewRepository tripReviewRepository;
     private final UserRepository userRepository;
     private final PlanRepository planRepository;
+    private final AuthenticationService authenticationService;
 
     public TripReviewResponse createTripReview(TripReviewRequest request) {
         User user = userRepository.findById(request.getUserId())
@@ -84,5 +86,11 @@ public class TripReviewService {
                 .stream()
                 .map(TripReviewResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Long getUserTripReviewCount(Long userId) {
+        authenticationService.getCurrentUser();
+        return tripReviewRepository.countByUserIdAndNotDeleted(userId);
     }
 }

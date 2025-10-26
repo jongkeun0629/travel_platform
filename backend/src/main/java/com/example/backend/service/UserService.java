@@ -20,6 +20,7 @@ public class UserService {
     private final JwtService jwtService;
     private final InterestRepository interestRepository;
     private final PlanService planService;
+    private final TripReviewService tripReviewService;
 
     @Transactional
     public UserEditResponseRequest getUser(Long userId) {
@@ -35,9 +36,10 @@ public class UserService {
         }
 
         Long planCount = planService.getUserPlanCount(userId);
+        Long tripReviewCount = tripReviewService.getUserTripReviewCount(userId);
         StatsDto statsDto = StatsDto.builder()
                 .plans(planCount)
-                .reviews(0L) // 리뷰 개수 기능
+                .reviews(tripReviewCount)
                 .build();
 
         return UserEditResponseRequest.builder()
@@ -73,9 +75,10 @@ public class UserService {
         }
 
         Long planCount = planService.getUserPlanCount(userId);
+        Long tripReviewCount = tripReviewService.getUserTripReviewCount(userId);
         StatsDto statsDto = StatsDto.builder()
                 .plans(planCount)
-                .reviews(0L) // 리뷰 개수 기능
+                .reviews(tripReviewCount) // 리뷰 개수 기능
                 .build();
 
         UserEditResponseRequest response = UserEditResponseRequest.builder()
