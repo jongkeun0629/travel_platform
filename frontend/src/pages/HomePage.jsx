@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import useAuthStore from "../store/authStore";
 import KakaoMap from "../components/Map/KakaoMap";
 import planService from "../services/plan";
 
 export default function HomePage() {
   const navigate = useNavigate();
-
-  const { user, logout } = useAuthStore();
 
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -67,35 +64,34 @@ export default function HomePage() {
               >
                 <div>
                   <h4 className="text-2xl font-semibold text-blue-400 mb-2">
-                    {plan.travelTitle}
+                    {plan.title}
                   </h4>
                   <p className="text-gray-300">
-                    작성자: {plan.author || "알 수 없음"}
+                    작성자: {plan.user.username || "알 수 없음"}
                   </p>
                   <p className="text-gray-400">
-                    도시: {plan.selectedCities?.join(", ") || "미정"}
+                    도시: {plan.destination || "미정"}
                   </p>
-                  {plan.travelPeriod && (
-                    <p className="text-gray-400">
-                      기간:{" "}
-                      {new Date(
-                        plan.travelPeriod.startDate
-                      ).toLocaleDateString()}{" "}
-                      ~{" "}
-                      {new Date(plan.travelPeriod.endDate).toLocaleDateString()}
-                    </p>
-                  )}
+
+                  <p className="text-gray-400">
+                    여행 기간: {new Date(plan.startDate).toLocaleDateString()} ~{" "}
+                    {new Date(plan.endDate).toLocaleDateString()}
+                  </p>
+
+                  <p className="text-gray-400">
+                    타입: {plan.type}, 공개 여부: {plan.visibility}
+                  </p>
                 </div>
 
                 <div className="flex justify-between items-center mt-4">
                   <Link
-                    to={`/traveldetail/${plan.id}`}
+                    to={`/traveldetail/${plan.planId}`}
                     className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white"
                   >
                     보기
                   </Link>
                   <button
-                    onClick={() => handleDeletePlan(plan.id)}
+                    onClick={() => handleDeletePlan(plan.planId)}
                     className="text-red-400 hover:text-red-500"
                   >
                     ✕ 삭제

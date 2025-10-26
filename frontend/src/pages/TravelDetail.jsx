@@ -4,6 +4,7 @@ import KakaoMapModal from "../components/Map/KakaoMapModal";
 import { FaRegEdit } from "react-icons/fa";
 import { CreatePlanForm } from "./CreatePlan";
 import planService from "../services/plan";
+import itemService from "../services/item";
 
 // 입력 타입 자동 판단
 const getInputType = (label) => {
@@ -51,7 +52,7 @@ export default function TravelDetail() {
 
   const [plan, setPlan] = useState(null);
   const [travelData, setTravelData] = useState({
-    checklist: [],
+    checklist: [], // ItemService
     itinerary: [],
     reservations: [],
   });
@@ -369,10 +370,11 @@ export default function TravelDetail() {
   const handleDeletePlan = async () => {
     if (!confirm("정말로 이 여행 계획을 삭제하시겠습니까?")) return;
     try {
-      if (plan?.id) {
-        await planService.deletePlan(plan.id);
+      if (plan?.planId) {
+        await planService.deletePlan(plan.planId);
         navigate("/", { replace: true });
       } else {
+        console.log(plan);
         alert("삭제할 계획 ID가 없습니다.");
       }
     } catch (err) {
@@ -400,8 +402,7 @@ export default function TravelDetail() {
             </p>
             <p className="mb-2 text-lg">여행 도시: {plan.destination}</p>
             <p className="mb-2 text-lg">
-              여행 기간: {""}
-              {new Date(plan.startDate).toLocaleDateString()} ~
+              여행 기간: {new Date(plan.startDate).toLocaleDateString()} ~{" "}
               {new Date(plan.endDate).toLocaleDateString()}
             </p>
             <p className="mb-2 text-lg">여행 타입: {plan.type}</p>
@@ -803,7 +804,7 @@ export default function TravelDetail() {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl font-bold">{plan.travelTitle}</h1>
+        <h1 className="text-4xl font-bold">{plan.title}</h1>
         <div className="flex gap-2">
           <Link to="/">
             <button className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-lg">
