@@ -41,6 +41,7 @@ public class SecurityConfig {
                         )
                         // 3. 로그인 성공 시 커스텀 핸들러 사용
                         .successHandler(oAuth2SuccessHandler)
+                        .failureUrl(frontendUrl + "/login?error=oauth_fail")
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)

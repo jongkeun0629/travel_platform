@@ -41,7 +41,7 @@ export default function LoginPage() {
   };
 
   const handleSocialLogin = (provider) => {
-    window.location.href = `/oauth2/authorization/${provider}`;
+    window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
   };
 
   return (
@@ -90,12 +90,8 @@ export default function LoginPage() {
           </button>
         </form>
         <div>
-          <a href="http://localhost:8080/oauth2/authorization/google">
-            <button>구글로 로그인</button>
-          </a>
-          <a href="http://localhost:8080/oauth2/authorization/kakao">
-            <button>카카오로 로그인</button>
-          </a>
+            <button onClick={() => handleSocialLogin('google')} className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">구글로 로그인</button>
+            <button onClick={() => handleSocialLogin('kakao')} className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">카카오로 로그인</button>
         </div>
 
         {error && (

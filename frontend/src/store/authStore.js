@@ -7,6 +7,34 @@ const useAuthStore = create((set) => ({
   loading: false,
   error: null,
 
+  socialLoginSuccess: () => {
+    const accessToken = localStorage.getItem("accessToken");
+    const userStr = localStorage.getItem("user");
+    
+    const user = userStr ? JSON.parse(userStr) : null;
+    
+    if (accessToken && user) {
+      set({
+        user: user,
+        isAuthenticated: !!accessToken, 
+        loading: false,
+        error: null,
+      });
+      return true; 
+    } else {
+      // 토큰이 누락되었을 경우 초기화 (안전 장치)
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      set({
+        user: null,
+        isAuthenticated: false,
+        loading: false,
+      });
+      return false; 
+    }
+  },
+
   login: async (userData) => {
     set({ loading: true, error: null });
     try {

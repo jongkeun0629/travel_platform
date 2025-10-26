@@ -36,7 +36,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 1. CustomOAuth2UserService에서 반환된 User 객체 가져오기
         //    (User 엔티티가 Principal로 설정되어 있다고 가정)
         User user = (User) authentication.getPrincipal();
-
+        System.out.println(user);
         // 2. JWT 토큰 발급
         String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
@@ -45,7 +45,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/oauth2/callback")
                 .queryParam("token", accessToken)
                 .queryParam("refreshToken", refreshToken)
-                .build().toUriString();
+                .build(true).toUriString();
+        System.out.println("targetUrl: " + targetUrl);
 
         // 4. 클라이언트를 리다이렉트
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
