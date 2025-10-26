@@ -5,6 +5,9 @@ const StorageKeys = {
 };
 
 const StorageService = {
+  setUser: (userObject) => {
+    localStorage.setItem(StorageKeys.USER, JSON.stringify(userObject));
+  },
   getAccessToken: () => localStorage.getItem(StorageKeys.ACCESS_TOKEN),
   setAccessToken: (token) =>
     localStorage.setItem(StorageKeys.ACCESS_TOKEN, token),
