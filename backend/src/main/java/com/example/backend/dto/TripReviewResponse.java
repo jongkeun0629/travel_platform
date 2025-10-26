@@ -24,7 +24,7 @@ public class TripReviewResponse {
                 .id(review.getId())
                 .userId(review.getUser().getId())
                 .username(review.getUser().getUsername())
-                .planId(review.getPlan().getPlanId())
+                .planId(review.getPlan().getId())
                 .title(review.getTitle())
                 .rating(review.getRating())
                 .region(review.getRegion())

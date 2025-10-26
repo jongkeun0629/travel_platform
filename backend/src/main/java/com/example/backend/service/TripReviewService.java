@@ -35,6 +35,7 @@ public class TripReviewService {
                 .rating(request.getRating())
                 .region(request.getRegion())
                 .content(request.getContent())
+                .region(request.getRegion())
                 .build();
 
         tripReviewRepository.save(review);

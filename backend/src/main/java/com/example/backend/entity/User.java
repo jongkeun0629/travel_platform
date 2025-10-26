@@ -30,8 +30,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails, OAuth2User {
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -78,10 +76,17 @@ public class User implements UserDetails, OAuth2User {
         // 또는 Map.of("id", this.id, "email", this.email, ...) 형태로 반환할 수도 있습니다.
         return this.attributes;
     }
+    @Override
+    public String getPassword() {
+        // 일반 로그인이 아니면 null이나 빈 문자열을 반환해도 됨
+        return password;
+    }
 
     @Override
-    public String getName() { return String.valueOf(this.attributes.get("sub")); } // 사용자 식별자(보통 id나 sub) 반환
-
+    public String getName() {
+        // DB의 고유 ID를 반환하는 것이 가장 안전하며 Spring Security에서 권장됩니다.
+        return this.id != null ? this.id.toString() : this.email;
+    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));

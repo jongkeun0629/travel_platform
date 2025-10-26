@@ -41,7 +41,7 @@ export default function LoginPage() {
   };
 
   const handleSocialLogin = (provider) => {
-    window.location.href = `/oauth2/authorization/${provider}`;
+    window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
   };
 
   return (
@@ -89,6 +89,10 @@ export default function LoginPage() {
             {loading ? "로그인 중..." : "로그인"}
           </button>
         </form>
+        <div>
+            <button onClick={() => handleSocialLogin('google')} className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">구글로 로그인</button>
+            
+        </div>
 
         {error && (
           <p className="text-red-500 text-xs text-center mt-4">{error}</p>
