@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "trip_review")
@@ -42,4 +44,10 @@ public class TripReview {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "tripreview",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<Photo> photoList;
+
 }

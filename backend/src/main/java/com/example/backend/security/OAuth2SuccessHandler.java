@@ -24,7 +24,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtService jwtService;
 
     @Value("http://localhost:5173")
-    private String frontendUrl; // 예: http://localhost:3000
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(
