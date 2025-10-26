@@ -1,0 +1,32 @@
+// src/main/java/com/example/backend/controller/UserInterestController.java
+package com.example.backend.controller;
+
+import com.example.backend.dto.InterestRequestDto;
+import com.example.backend.dto.InterestResponseDto;
+import com.example.backend.service.UserInterestService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/users/{userId}/interests")
+@RequiredArgsConstructor
+public class UserInterestController {
+
+    private final UserInterestService userInterestService;
+
+    @GetMapping
+    public ResponseEntity<InterestResponseDto> getUserInterests(@PathVariable Long userId) {
+        InterestResponseDto response = userInterestService.getUserInterests(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping
+    public ResponseEntity<InterestResponseDto> updateUserInterests(
+            @PathVariable Long userId,
+            @RequestBody InterestRequestDto requestDto
+    ) {
+        InterestResponseDto response = userInterestService.updateUserInterests(userId, requestDto);
+        return ResponseEntity.ok(response);
+    }
+}
