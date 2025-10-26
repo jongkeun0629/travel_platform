@@ -4,6 +4,8 @@ import ProfileView from "../components/profile/ProfileView";
 import useAuthStore from "../store/authStore";
 import profileService from "../services/profile";
 import StorageService from "../services/storage";
+import interestService from "../services/interest";
+import { userService } from "../services/userService";
 
 export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
@@ -14,20 +16,33 @@ export default function ProfilePage() {
     const userEmail = useAuthStore((state) => state.user?.email);
 
     useEffect(() => {
-        const fetchProfile = async () => {
-            setIsLoading(true);
-            try {
-                const response = await profileService.getProfile();
-                setProfileData(response.data);
-            } catch (error) {
-                console.error("프로필 정보를 불러오는데 실패했습니다.", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const fetchProfile = async () => {
+        setIsLoading(true);
+        try {
+            console.log("test1");
+            const profileResponse = await profileService.getProfile();
+                        console.log("test2"+profileResponse);
 
-        fetchProfile();
-    }, []);
+            const interestsResponse = await interestService.getUserInterests();
+            const interestList = interestsResponse.interests;
+            console.log("test3"+interestList);
+            const finalProfileData = {
+                ...profileResponse.data, 
+                interests: interestList || [], 
+            };
+
+            console.log("최종 프로필 데이터:", finalProfileData);
+            setProfileData(finalProfileData);
+
+        } catch (error) {
+            // ...
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    fetchProfile();
+}, []);
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -44,17 +59,20 @@ export default function ProfilePage() {
             email: userEmail,
             interests: updatedDataFromForm.interests,
         };
+        const interestsArray = updatedDataFromForm.interests;
 
         try {
             const response = await profileService.updateProfile(requestDto);
             const updatedProfileFromServer = response.data;
-
+            const response2 = await userService.updateInterests(interestsArray);
             if (updatedProfileFromServer.access_token && updatedProfileFromServer.refresh_token) {
                 StorageService.setAccessToken(updatedProfileFromServer.access_token);
                 StorageService.setRefreshToken(updatedProfileFromServer.refresh_token);
             }
 
-            setProfileData(updatedProfileFromServer);
+            setProfileData({...updatedProfileFromServer,
+                interests: response2.interestName,
+            });
             updateAuthUser({
                 username: updatedProfileFromServer.username,
                 introduction: updatedProfileFromServer.introduction

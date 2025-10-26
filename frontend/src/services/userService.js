@@ -1,3 +1,5 @@
+import interestService from "./interest";
+
 const USER_KEY = "user";
 const USERS_KEY = "users";
 
@@ -92,4 +94,9 @@ export const userService = {
 
     return currentUser;
   },
+  async updateInterests(interestsArray) {
+        // InterestService의 DTO 형식에 맞춰 객체 재구성
+        const requestDto = { interestNames: interestsArray }; 
+        return await interestService.updateUserInterests(requestDto);
+    }
 };
