@@ -33,17 +33,21 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  server:
-    port: 8080
 
 jwt:
   secret: "23bLwsCSUZf7Lw29r8PVpwOxTcHiTwp7l4EpEJuqBvg="
   expiration: 86400000
   refresh-expiration: 604800000
+
 aws:
+  access-key-id: ${AWS_ACCESS_KEY_ID}
+  secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+  region: ${AWS_REGION}
   s3:
-    bucket-name: "${AWS-BUCKET}"
-    region: "${AWS-REGION}"
-  credentials:
-    access-key: "${AWS-ACCESS}"
-    secret-key: "${AWS-SECRET}"
+    bucket-name: ${AWS_BUCKET_NAME}
+
+server:
+  port: 8080
+
+frontend:
+  url: "http://localhost:5173"

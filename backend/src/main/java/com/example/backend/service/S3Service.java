@@ -29,7 +29,7 @@ public class S3Service {
 
     private final AmazonS3 s3Client;
 
-    @Value("${AWS-BUCKET}")
+    @Value("${AWS-BUCKET_NAME}")
     private String bucketName;
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;

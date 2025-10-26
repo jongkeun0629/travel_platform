@@ -18,18 +18,22 @@ public class PlanResponse {
     private LocalDate endDate;
     private String type;
     private String status;
+    private String visibility;
+    private UserDto user;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public static PlanResponse fromEntity(Plan plan) {
         return PlanResponse.builder()
-                .planId(plan.getPlanId())
+                .planId(plan.getId())
                 .title(plan.getTitle())
                 .destination(plan.getDestination())
                 .startDate(plan.getStartDate())
                 .endDate(plan.getEndDate())
                 .type(plan.getType())
                 .status(plan.getStatus())
+                .visibility(plan.getVisibility())
+                .user(UserDto.fromEntity(plan.getUser()))
                 .createdAt(plan.getCreatedAt())
                 .updatedAt(plan.getUpdatedAt())
                 .build();

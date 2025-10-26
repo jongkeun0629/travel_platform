@@ -1,13 +1,17 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.PlanRequest;
+import com.example.backend.dto.PlanResponse;
 import com.example.backend.entity.Plan;
 import com.example.backend.entity.User;
 import com.example.backend.repository.ItemRepository;
 import com.example.backend.repository.PlanRepository;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +24,8 @@ public class PlanService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final ItemService itemService;
+
+    private final AuthenticationService authenticationService;
 
     public Plan getPlanById(Long planId) {
         return planRepository.findById(planId)
@@ -37,6 +43,7 @@ public class PlanService {
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .type(request.getType())
+                .visibility(request.getVisibility())
                 .user(user)
                 .status("planned")
                 .createdAt(LocalDateTime.now())
@@ -44,6 +51,34 @@ public class PlanService {
                 .build();
         System.out.println("plan builded");
         return planRepository.save(plan);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PlanResponse> getAllPlans(Pageable pageable) {
+        User currentUser = authenticationService.getCurrentUser();
+        Page<Plan> posts = planRepository.findAllPlan(pageable);
+        return posts.map(PlanResponse::fromEntity);
+    }
+
+    public PlanResponse getPlanByIdd(Long planId) {
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new RuntimeException("Plan not found"));
+
+        return PlanResponse.fromEntity(plan);
+    }
+
+
+    @Transactional(readOnly = true)
+    public Page<PlanResponse> getUserPlans(Long userId, Pageable pageable) {
+        User currentUser = authenticationService.getCurrentUser();
+        Page<Plan> posts = planRepository.findByUserIdAndNotDeleted(userId, pageable);
+        return posts.map(PlanResponse::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public Long getUserPlanCount(Long userId) {
+        authenticationService.getCurrentUser();
+        return planRepository.countByUserIdAndNotDeleted(userId);
     }
 
     public Plan updatedPlan(Long planId, PlanRequest request) {

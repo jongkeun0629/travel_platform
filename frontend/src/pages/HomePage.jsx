@@ -1,31 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { userService } from "../services/userService";
 import KakaoMap from "../components/Map/KakaoMap";
+import planService from "../services/plan";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+
   const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const currentUser = userService.getCurrentUser();
-    if (!currentUser) {
-      navigate("/login", { replace: true });
-    } else {
-      setUser(currentUser);
+    const loadPlans = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const content = await planService.getAllPlans();
+        setPlans(content || []);
+      } catch (e) {
+        console.error("Failed to load plans", e);
+        setError("여행 계획을 불러오는 데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPlans();
+  }, []);
+
+  const handleDeletePlan = async (id) => {
+    if (!confirm("정말로 이 여행 계획을 삭제하시겠습니까?")) return;
+    try {
+      await api.delete(`/api/plans/${id}`);
+      setPlans((prev) => prev.filter((p) => p.id !== id));
+    } catch (e) {
+      console.error("Failed to delete plan", e);
+      alert("삭제에 실패했습니다.");
     }
-
-    const savedPlans = JSON.parse(localStorage.getItem("travelPlans") || "[]");
-    setPlans(savedPlans);
-  }, [navigate]);
-
-  if (!user) return null;
-
-  const handleDeletePlan = (id) => {
-    const updated = plans.filter((p) => p.id !== id);
-    setPlans(updated);
-    localStorage.setItem("travelPlans", JSON.stringify(updated));
   };
 
   return (
@@ -36,7 +47,11 @@ export default function HomePage() {
           🧳 내 여행 계획
         </h3>
 
-        {plans.length === 0 ? (
+        {loading ? (
+          <p className="text-gray-400 text-center py-6">로딩 중...</p>
+        ) : error ? (
+          <p className="text-red-400 text-center py-6">{error}</p>
+        ) : plans.length === 0 ? (
           <p className="text-gray-400 text-center py-6">
             아직 여행 계획이 없습니다.
           </p>
@@ -49,35 +64,34 @@ export default function HomePage() {
               >
                 <div>
                   <h4 className="text-2xl font-semibold text-blue-400 mb-2">
-                    {plan.travelTitle}
+                    {plan.title}
                   </h4>
                   <p className="text-gray-300">
-                    작성자: {plan.author || "알 수 없음"}
+                    작성자: {plan.user.username || "알 수 없음"}
                   </p>
                   <p className="text-gray-400">
-                    도시: {plan.selectedCities?.join(", ") || "미정"}
+                    도시: {plan.destination || "미정"}
                   </p>
-                  {plan.travelPeriod && (
-                    <p className="text-gray-400">
-                      기간:{" "}
-                      {new Date(
-                        plan.travelPeriod.startDate
-                      ).toLocaleDateString()}{" "}
-                      ~{" "}
-                      {new Date(plan.travelPeriod.endDate).toLocaleDateString()}
-                    </p>
-                  )}
+
+                  <p className="text-gray-400">
+                    여행 기간: {new Date(plan.startDate).toLocaleDateString()} ~{" "}
+                    {new Date(plan.endDate).toLocaleDateString()}
+                  </p>
+
+                  <p className="text-gray-400">
+                    타입: {plan.type}, 공개 여부: {plan.visibility}
+                  </p>
                 </div>
 
                 <div className="flex justify-between items-center mt-4">
                   <Link
-                    to={`/traveldetail/${plan.id}`}
+                    to={`/traveldetail/${plan.planId}`}
                     className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white"
                   >
                     보기
                   </Link>
                   <button
-                    onClick={() => handleDeletePlan(plan.id)}
+                    onClick={() => handleDeletePlan(plan.planId)}
                     className="text-red-400 hover:text-red-500"
                   >
                     ✕ 삭제

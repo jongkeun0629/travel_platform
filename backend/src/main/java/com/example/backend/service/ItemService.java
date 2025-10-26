@@ -45,7 +45,7 @@ public class ItemService {
 
     @Transactional
     public void add(Long planId, ItemRequest request){
-        itemRepository.findByPlanPlanIdAndName(planId, request.getName()).ifPresent(item -> {throw new IllegalArgumentException("동일한 항목이 존재합니다.");});//PlanPlanId인 이유- Plan객체내ㅐ에서 planId를 찾기 때문에
+        itemRepository.findByPlan_IdAndName(planId, request.getName()).ifPresent(item -> {throw new IllegalArgumentException("동일한 항목이 존재합니다.");});//PlanPlanId인 이유- Plan객체내ㅐ에서 planId를 찾기 때문에
         Item newItem = Item.builder()
                         .name(request.getName())
                 .plan(planRepository.findById(planId).get())
@@ -55,13 +55,13 @@ public class ItemService {
 
     @Transactional
     public void delete(Long planId, Long id){
-        if(itemRepository.findById(id).get().getPlan().getPlanId().equals(planId)) {
+        if(itemRepository.findById(id).get().getPlan().getId().equals(planId)) {
             itemRepository.deleteById(id);
         }
     }
     @Transactional
     public List<ItemResponse> get(Long planId) {
-        List<Item> items = itemRepository.findAllByPlanPlanId(planId);
+        List<Item> items = itemRepository.findAllByPlan_Id(planId);
 
         return items.stream()
                 .map(ItemResponse::fromEntity)
@@ -71,7 +71,7 @@ public class ItemService {
     @Transactional
     public void toggleCheck(Long planId, Long id){
         Item item = itemRepository.findById(id).get();
-        if(item.getPlan().getPlanId().equals(planId)) {
+        if(item.getPlan().getId().equals(planId)) {
             item.setChecked(true);
         }
         itemRepository.save(item);

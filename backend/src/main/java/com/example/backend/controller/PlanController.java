@@ -6,10 +6,14 @@ import com.example.backend.entity.Plan;
 import com.example.backend.service.ItemService;
 import com.example.backend.service.PlanService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/plans")
@@ -29,6 +33,40 @@ public class PlanController {
         itemService.InitialItem(createdPlan);
 
         return ResponseEntity.ok(PlanResponse.fromEntity(createdPlan));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<PlanResponse>> getAllPlans(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PlanResponse> plans = planService.getAllPlans(pageable);
+        return ResponseEntity.ok(plans);
+    }
+
+    @GetMapping("/{planId}")
+    public ResponseEntity<PlanResponse> getPlanById(@PathVariable Long planId) {
+        PlanResponse plan = planService.getPlanByIdd(planId);
+        return ResponseEntity.ok(plan);
+    }
+
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<PlanResponse>> getUserPlans(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PlanResponse> plans = planService.getUserPlans(userId, pageable);
+        return ResponseEntity.ok(plans);
+    }
+
+    @GetMapping("/user/{userId}/count")
+    public ResponseEntity<Map<String, Long>> getUserPlanCount(@PathVariable Long userId) {
+        Long count = planService.getUserPlanCount(userId);
+        return ResponseEntity.ok(Map.of("count", count));
     }
 
     public ResponseEntity<List<PlanResponse>> getPlansByUser(@RequestParam Long userId) {
