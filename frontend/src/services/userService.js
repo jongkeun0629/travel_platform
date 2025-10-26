@@ -1,4 +1,4 @@
-const USER_KEY = "currentUser";
+const USER_KEY = "user";
 const USERS_KEY = "users";
 
 export const userService = {
@@ -62,7 +62,7 @@ export const userService = {
 
   updateUser(old, updateData) {
     const users = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-    const userIndex = users.findIndex(u => u.userId === old);
+    const userIndex = users.findIndex((u) => u.userId === old);
 
     if (userIndex === -1) {
       throw new Error("사용자를 찾을 수 없습니다.");
@@ -74,13 +74,13 @@ export const userService = {
     );
 
     if (isDuplicate) {
-      throw new Error("이미 사용 중인 아이디입니다.")
+      throw new Error("이미 사용 중인 아이디입니다.");
     }
 
     users[userIndex] = {
       ...users[userIndex],
       userId: newUserId,
-      email: updateData.email
+      email: updateData.email,
     };
     localStorage.setItem(USERS_KEY, JSON.stringify(users));
 

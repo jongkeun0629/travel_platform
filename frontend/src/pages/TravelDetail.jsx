@@ -586,7 +586,7 @@ export default function TravelDetail() {
 
   const handleSelectPlace = ({ address, phone, place_name }) => {
     if (modalField === "place") {
-      // 변경: place를 문자열이 아니라 PlaceRequest에 맞춘 객체로 저장
+      // place를 문자열이 아니라 PlaceRequest에 맞춘 객체로 저장
       setNewPlan((prev) => ({
         ...prev,
         place: {
@@ -623,13 +623,12 @@ export default function TravelDetail() {
     try {
       const planId = plan?.planId ?? plan?.id ?? id;
       const createdItem = await itemService.createItem(planId, {
-        text: newChecklist.trim(),
-        checked: false,
+        name: newChecklist.trim(), // text -> name으로 변경
       });
-      // 변경: service가 반환한 필드명에 맞춰 정규화 (name/checked/id)
+      // service가 반환한 필드명에 맞춰 정규화 (name/checked/id)
       const itemForUi = {
         id: createdItem.id ?? createdItem.itemId ?? null,
-        name: createdItem.text ?? createdItem.name ?? newChecklist.trim(),
+        name: createdItem.name ?? newChecklist.trim(),
         checked: createdItem.checked ?? false,
       };
       setTravelData((prev) => ({
@@ -666,17 +665,17 @@ export default function TravelDetail() {
       const item = travelData.checklist[i];
 
       if (item?.id) {
-        // ✅ 서버에서 토글하고 업데이트된 상태 받기
+        // 서버에서 토글하고 업데이트된 상태 받기
         const updated = await itemService.updateItem(planId, item.id);
 
-        // ✅ 응답 데이터를 UI 형식으로 정규화
+        // 응답 데이터를 UI 형식으로 정규화
         const uiUpdated = {
           id: updated.id ?? item.id,
           name: updated.name ?? item.name,
           checked: updated.checked ?? !item.checked,
         };
 
-        // ✅ UI 상태 업데이트
+        // UI 상태 업데이트
         setTravelData((prev) => ({
           ...prev,
           checklist: prev.checklist.map((it, idx) =>
@@ -684,16 +683,15 @@ export default function TravelDetail() {
           ),
         }));
       } else {
-        // ✅ ID가 없는 경우 새로 생성
+        // ID가 없는 경우 새로 생성
         const created = await itemService.createItem(planId, {
-          text: item.name,
-          checked: !item.checked,
-        });
+          name: item.name, // text -> name으로 변경
+        }); // checked는 제거 (기본값이 false이므로)
 
         const uiCreated = {
           id: created.id ?? null,
           name: created.name ?? item.name,
-          checked: created.checked ?? !item.checked,
+          checked: created.checked ?? false, // 서버에서 받은 checked 사용
         };
 
         setTravelData((prev) => ({
@@ -711,7 +709,7 @@ export default function TravelDetail() {
 
   /* ------------------------------
       일정 핸들러 (planDetail 연동)
-      변경: planDetailService 사용, returned PlanDetailResponse -> UI 포맷으로 변환
+      planDetailService 사용, returned PlanDetailResponse -> UI 포맷으로 변환
   ------------------------------ */
   const handleAddPlan = async () => {
     if (!newPlan.date || !newPlan.time || !newPlan.content) {
@@ -722,7 +720,7 @@ export default function TravelDetail() {
     try {
       const planId = plan?.planId ?? plan?.id ?? id;
 
-      // 변경: placeId 없으면 PlaceRequest 형태의 place 필드 제공 (백엔드 요구)
+      // placeId 없으면 PlaceRequest 형태의 place 필드 제공 (백엔드 요구)
       const placePayload =
         newPlan.place && typeof newPlan.place === "object"
           ? {
@@ -778,7 +776,7 @@ export default function TravelDetail() {
   };
 
   const handleRemovePlan = async (i) => {
-    // 변경: 서버에서 planDetail 삭제 엔드포인트 호출 가능 -> 여기선 기존 방식 유지 (plan.travelData 업데이트)
+    // 서버에서 planDetail 삭제 엔드포인트 호출 가능 -> 여기선 기존 방식 유지 (plan.travelData 업데이트)
     const item = travelData.itinerary[i];
     try {
       if (item?.id) {
@@ -853,7 +851,7 @@ export default function TravelDetail() {
 
   /* ------------------------------
       예약 핸들러 (reservation 연동)
-      변경: PlanDetail 필요성 처리, payload 매핑, reservationService 호출
+      PlanDetail 필요성 처리, payload 매핑, reservationService 호출
   ------------------------------ */
   const handleAddReservation = async () => {
     const fields = getReservationFields(reservationType);
@@ -1311,7 +1309,7 @@ export default function TravelDetail() {
                     value={
                       editingItineraryIndex !== null
                         ? editingItineraryData?.place || ""
-                        : // 변경: newPlan.place가 객체일 수 있으므로 placeName 또는 문자열 사용
+                        : // newPlan.place가 객체일 수 있으므로 placeName 또는 문자열 사용
                           (typeof newPlan.place === "string"
                             ? newPlan.place
                             : newPlan.place?.placeName) || ""
