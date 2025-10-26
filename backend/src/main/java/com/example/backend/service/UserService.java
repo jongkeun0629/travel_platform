@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.StatsDto;
 import com.example.backend.dto.UserEditResponseRequest;
 import com.example.backend.entity.Interest;
 import com.example.backend.entity.User;
@@ -18,6 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final InterestRepository interestRepository;
+    private final PlanService planService;
 
     @Transactional
     public UserEditResponseRequest getUser(Long userId) {
@@ -32,6 +34,12 @@ public class UserService {
             birthDateString = user.getBirth().toString();
         }
 
+        Long planCount = planService.getUserPlanCount(userId);
+        StatsDto statsDto = StatsDto.builder()
+                .plans(planCount)
+                .reviews(0L) // 리뷰 개수 기능
+                .build();
+
         return UserEditResponseRequest.builder()
                 .username(user.getUsername())
                 .email(user.getEmail())
@@ -39,6 +47,7 @@ public class UserService {
                 .profileImageUrl(user.getProfileImageUrl())
                 .interests(interestNames)
                 .birthdate(birthDateString)
+                .stats(statsDto)
                 .build();
     }
 
@@ -63,12 +72,19 @@ public class UserService {
             birthDateString = updatedUser.getBirth().toString();
         }
 
+        Long planCount = planService.getUserPlanCount(userId);
+        StatsDto statsDto = StatsDto.builder()
+                .plans(planCount)
+                .reviews(0L) // 리뷰 개수 기능
+                .build();
+
         UserEditResponseRequest response = UserEditResponseRequest.builder()
                 .email(request.getEmail())
                 .username(user.getUsername())
                 .introduction(user.getIntroduction())
                 .interests(request.getInterests())
                 .birthdate(birthDateString)
+                .stats(statsDto)
                 .build();
 
         if (usernameChanged) {

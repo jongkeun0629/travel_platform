@@ -19,6 +19,7 @@ public class UserEditResponseRequest {
     private String profileImageUrl;
     private List<String> interests;
     private String birthdate;
+    private StatsDto stats;
 
     @JsonProperty("access_token")
     private String accessToken;
