@@ -19,7 +19,7 @@ spring:
           auth: true
           starttls:
             enable: true
-  security:
+#  security:
 #    oauth2:
 #      client:
 #        registration:
