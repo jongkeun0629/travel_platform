@@ -33,6 +33,7 @@ public class TripReviewService {
                 .plan(plan)
                 .title(request.getTitle())
                 .rating(request.getRating())
+                .region(request.getRegion())
                 .content(request.getContent())
                 .region(request.getRegion())
                 .build();

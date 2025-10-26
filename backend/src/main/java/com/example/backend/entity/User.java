@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -90,13 +91,13 @@ public class User implements UserDetails, OAuth2User {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
-//    @Override
-//    public String getUsername() {
-//        return this.email;
-//    }
-//    // 다음 4가지 상태 메서드도 추가해야 합니다 (간단하게 true 반환).
-//    @Override public boolean isAccountNonExpired() { return true; }
-//    @Override public boolean isAccountNonLocked() { return true; }
-//    @Override public boolean isCredentialsNonExpired() { return true; }
-//    @Override public boolean isEnabled() { return true; }
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_interest",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "interest_id")
+    )
+    private List<Interest> interests = new ArrayList<>();
+
 }
