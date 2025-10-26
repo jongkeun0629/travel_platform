@@ -1,4 +1,3 @@
-// src/main/java/com/example/backend/dto/InterestResponseDto.java
 package com.example.backend.dto;
 
 import lombok.AllArgsConstructor;

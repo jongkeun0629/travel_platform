@@ -33,6 +33,7 @@ public class TripReviewService {
                 .plan(plan)
                 .title(request.getTitle())
                 .rating(request.getRating())
+                .region(request.getRegion())
                 .content(request.getContent())
                 .build();
 
@@ -46,8 +47,8 @@ public class TripReviewService {
 
         review.setTitle(request.getTitle());
         review.setRating(request.getRating());
-        review.setRegion(review.getRegion());
-        review.setContent(review.getContent());
+        review.setRegion(request.getRegion());
+        review.setContent(request.getContent());
 
         tripReviewRepository.save(review);
         return TripReviewResponse.fromEntity(review);
