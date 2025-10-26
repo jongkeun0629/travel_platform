@@ -65,17 +65,19 @@ export default function ProfilePage() {
             const response = await profileService.updateProfile(requestDto);
             const updatedProfileFromServer = response.data;
             const response2 = await userService.updateInterests(interestsArray);
+            console.log(interestsArray+"response2+");
             if (updatedProfileFromServer.access_token && updatedProfileFromServer.refresh_token) {
                 StorageService.setAccessToken(updatedProfileFromServer.access_token);
                 StorageService.setRefreshToken(updatedProfileFromServer.refresh_token);
             }
 
             setProfileData({...updatedProfileFromServer,
-                interests: response2.interestName,
+                interests: interestsArray,
             });
             updateAuthUser({
                 username: updatedProfileFromServer.username,
-                introduction: updatedProfileFromServer.introduction
+                introduction: updatedProfileFromServer.introduction,
+                interests: interestsArray
             });
 
             setIsEditing(false);
