@@ -18,9 +18,9 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping("/add")
-    public ResponseEntity<String> addItem(@PathVariable Long planId, @RequestBody ItemRequest request){
-        itemService.add(planId,request);
-        return ResponseEntity.status(201).body("Item added successfully.");
+    public ResponseEntity<ItemResponse> addItem(@PathVariable Long planId, @RequestBody ItemRequest request){
+        ItemResponse createdItem = itemService.add(planId,request);
+        return ResponseEntity.status(201).body(createdItem);  // ItemResponse 반환
     }
     @DeleteMapping("/{itemId}")
     public ResponseEntity<String> deleteItem(@PathVariable Long planId, @PathVariable Long itemId){

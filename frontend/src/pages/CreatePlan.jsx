@@ -45,38 +45,45 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
   // 초기값 채우기 (수정 모드용)
   useEffect(() => {
     if (initialData) {
-      setTravelTitle(initialData.travelTitle || "");
-      setSelectedCities(
-        (initialData.selectedCities || [])
+      // Backend의 Plan 필드명에 맞춰서 초기값 설정
+      setTravelTitle(initialData.title || "");
+
+      // destination은 쉼표로 구분된 문자열 (예: "서울,부산")
+      if (initialData.destination) {
+        const cityNames = initialData.destination
+          .split(",")
+          .map((s) => s.trim());
+        const cityIds = cityNames
           .map((name) => {
             const found = cityData.find((c) => c.name === name);
             return found ? found.id : null;
           })
-          .filter(Boolean)
-      );
-      if (initialData.travelType) {
+          .filter(Boolean);
+        setSelectedCities(cityIds);
+      }
+
+      // type 필드 처리
+      if (initialData.type) {
         const foundType = travelTypeOptions.find(
-          (t) => t.name === initialData.travelType
+          (t) => t.name === initialData.type
         );
         if (foundType) setSelectedType(foundType.id);
       }
+
+      // visibility 필드 처리
       if (initialData.visibility) {
         const foundVis = publicSettingOptions.find(
           (v) => v.name === initialData.visibility
         );
         if (foundVis) setSelectedVisibility(foundVis.id);
       }
-      if (initialData.travelPeriod) {
-        setStartDate(
-          initialData.travelPeriod.startDate
-            ? new Date(initialData.travelPeriod.startDate)
-            : null
-        );
-        setEndDate(
-          initialData.travelPeriod.endDate
-            ? new Date(initialData.travelPeriod.endDate)
-            : null
-        );
+
+      // startDate, endDate 처리
+      if (initialData.startDate) {
+        setStartDate(new Date(initialData.startDate));
+      }
+      if (initialData.endDate) {
+        setEndDate(new Date(initialData.endDate));
       }
     }
   }, [initialData]);
