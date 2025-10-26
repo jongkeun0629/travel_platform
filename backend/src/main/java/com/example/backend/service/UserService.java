@@ -57,12 +57,20 @@ public class UserService {
         }
 
         User updatedUser = userRepository.save(user);
+
+        String birthDateString = null;
+        if (updatedUser.getBirth() != null) {
+            birthDateString = updatedUser.getBirth().toString();
+        }
+
         UserEditResponseRequest response = UserEditResponseRequest.builder()
                 .email(request.getEmail())
                 .username(user.getUsername())
                 .introduction(user.getIntroduction())
                 .interests(request.getInterests())
+                .birthdate(birthDateString)
                 .build();
+
         if (usernameChanged) {
             String newAccessToken = jwtService.generateToken(updatedUser);
             String newRefreshToken = jwtService.generateRefreshToken(updatedUser);
