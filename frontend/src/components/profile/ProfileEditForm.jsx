@@ -5,11 +5,11 @@ import CheckBoxGroup from "./CheckBoxGroup";
 
 export default function ProfileEditForm({ currentProfile, onSave, onCancel }) {
     const [profile, setProfile] = useState({
-        userId: currentProfile.userId,
-        introduction: currentProfile.introduction,
+        username: currentProfile.username || '',
+        introduction: currentProfile.introduction || '',
         birthdate: currentProfile.birthdate || '',
     });
-    const [selectedInterests, setSelectedInterests] = useState(currentProfile.interests);
+    const [selectedInterests, setSelectedInterests] = useState(currentProfile.interests || []);
     const [imagePreview, setImagePreview] = useState(currentProfile.profileImageUrl);
     const [imageFile, setImageFile] = useState(null);
 
@@ -97,10 +97,10 @@ export default function ProfileEditForm({ currentProfile, onSave, onCancel }) {
                     />
                     <FormInput
                         label="닉네임 (아이디)"
-                        id="userId"
-                        name="userId"
+                        id="username"
+                        name="username"
                         type="text"
-                        value={profile.userId}
+                        value={profile.username}
                         onChange={handleInputChange}
                         maxLength={20}
                         placeholder="사용할 닉네임을 입력하세요"

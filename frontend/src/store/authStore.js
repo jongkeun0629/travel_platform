@@ -10,17 +10,17 @@ const useAuthStore = create((set) => ({
   socialLoginSuccess: () => {
     const accessToken = localStorage.getItem("accessToken");
     const userStr = localStorage.getItem("user");
-    
+
     const user = userStr ? JSON.parse(userStr) : null;
-    
+
     if (accessToken && user) {
       set({
         user: user,
-        isAuthenticated: !!accessToken, 
+        isAuthenticated: !!accessToken,
         loading: false,
         error: null,
       });
-      return true; 
+      return true;
     } else {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
@@ -30,7 +30,7 @@ const useAuthStore = create((set) => ({
         isAuthenticated: false,
         loading: false,
       });
-      return false; 
+      return false;
     }
   },
 
@@ -85,8 +85,13 @@ const useAuthStore = create((set) => ({
   setAuth: (authData) => set(authData),
 
   updateUser: (userData) => {
-    localStorage.setItem("user", JSON.stringify(userData));
-    set({ user: userData });
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const updatedUser = { ...currentUser, ...userData };
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+
+    set((state) => ({
+      user: { ...state.user, ...userData },
+    }));
   },
 }));
 

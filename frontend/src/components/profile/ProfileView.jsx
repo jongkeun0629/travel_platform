@@ -48,7 +48,7 @@ export default function ProfileView({ profile, onEdit }) {
                 </div>
 
                 <div className="flex flex-col items-center mt-4 md:items-start md:mt-0">
-                    <h2 className="text-3xl font-semibold text-gray-900">{profile.userId}</h2>
+                    <h2 className="text-3xl font-semibold text-gray-900">{profile.username}</h2>
                     <p className="mt-1 text-sm text-gray-700">{profile.email}</p>
                     <p className="mt-1 text-sm text-gray-700">생년월일: {profile.birthdate || '미설정'}</p>
                     <p className="mt-3 text-center text-gray-800 md:text-left">
@@ -68,7 +68,7 @@ export default function ProfileView({ profile, onEdit }) {
                 </div>
             </div>
             <div className="space-y-6 pt-6">
-                <TagList title="선호 여행 타입" tags={profile.interests} />
+                <TagList title="선호 여행 타입" tags={profile.interests || []} />
             </div>
         </div>
     );

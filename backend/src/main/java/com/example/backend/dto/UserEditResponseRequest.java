@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -15,6 +17,9 @@ public class UserEditResponseRequest {
     private String email;
     private String introduction;
     private String profileImageUrl;
+    private List<String> interests;
+    private String birthdate;
+
     @JsonProperty("access_token")
     private String accessToken;
 
