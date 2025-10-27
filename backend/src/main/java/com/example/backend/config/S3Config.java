@@ -2,7 +2,6 @@ package com.example.backend.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -15,11 +14,14 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class S3Config {
 
-    @Value("${AWS_ACCESS_KEY_ID}")
+    @Value("${AWS_ACCESS_KEY_ID:}")
     private String accessKey;
 
-    @Value("${AWS_SECRET_ACCESS_KEY}")
+    @Value("${AWS_SECRET_ACCESS_KEY:}")
     private String secretKey;
+
+    @Value("${AWS_BUCKET_NAME}")
+    private String bucketName;
 
     @Value("${AWS_REGION}")
     private String region;
