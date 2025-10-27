@@ -288,7 +288,11 @@ export default function TripReviewPage() {
           onChange={(e) => setRegionFilter(e.target.value)}
           className="w-full border border-gray-600 bg-gray-800 rounded-lg px-3 py-2 outline-none"
         />
-        <button onClick={load} disabled={loading} className="px-3 py-2 rounded-lg border bg-white text-black">
+        <button
+          onClick={load}
+          disabled={loading}
+          className="px-3 py-2 rounded-lg border bg-white text-black w-20"
+        >
           검색
         </button>
         <button
@@ -297,7 +301,7 @@ export default function TripReviewPage() {
             load();
           }}
           disabled={loading}
-          className="px-3 py-2 rounded-lg border"
+          className="px-3 py-2 rounded-lg border w-25"
         >
           초기화
         </button>
@@ -331,11 +335,17 @@ export default function TripReviewPage() {
             min={1}
             max={5}
             value={form.rating}
-            onChange={(e) => setForm({ ...form, rating: clampRating(e.target.value) })}
+            onChange={(e) =>
+              setForm({ ...form, rating: clampRating(e.target.value) })
+            }
             className="w-20 border border-gray-600 bg-gray-900 rounded-lg px-3 py-2 outline-none"
           />
           <div className="ml-auto flex gap-2">
-            <button type="submit" disabled={submitting} className="px-3 py-2 rounded-lg bg-blue-600 text-white">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-3 py-2 rounded-lg bg-blue-600 text-white"
+            >
               {editingId ? "수정" : "등록"}
             </button>
             <button

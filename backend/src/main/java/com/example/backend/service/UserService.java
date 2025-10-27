@@ -8,6 +8,11 @@ import com.example.backend.repository.InterestRepository;
 import com.example.backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +26,7 @@ public class UserService {
     private final InterestRepository interestRepository;
     private final PlanService planService;
     private final TripReviewService tripReviewService;
+    private final UserDetailsService userDetailsService;
 
     @Transactional
     public UserEditResponseRequest getUser(Long userId) {
@@ -57,10 +63,11 @@ public class UserService {
     public UserEditResponseRequest updateUser(Long userId, UserEditResponseRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         boolean usernameChanged = !user.getUsername().equals(request.getUsername());
+        System.out.println("들여온네임과 현재 네임"+request.getUsername()+user.getUsername());
+        System.out.println("이름 바꼈나:"+usernameChanged);
 
         user.setUsername(request.getUsername());
         user.setIntroduction(request.getIntroduction());
-
         if (request.getInterests() != null) {
             List<Interest> newInterests = interestRepository.findByNameIn(request.getInterests());
             user.getInterests().clear();
@@ -68,13 +75,20 @@ public class UserService {
         }
 
         User updatedUser = userRepository.save(user);
+        if (usernameChanged) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(updatedUser.getUsername());
+
+            Authentication newAuthentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+
+            SecurityContextHolder.getContext().setAuthentication(newAuthentication);
+        }
 
         String birthDateString = null;
         if (updatedUser.getBirth() != null) {
             birthDateString = updatedUser.getBirth().toString();
         }
-
-        Long planCount = planService.getUserPlanCount(userId);
+        Long planCount = planService.getUserPlanCount(userId);//여기
         Long tripReviewCount = tripReviewService.getUserTripReviewCount(userId);
         StatsDto statsDto = StatsDto.builder()
                 .plans(planCount)

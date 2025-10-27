@@ -61,7 +61,7 @@ public class PlaceReviewService {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new IllegalArgumentException("장소를 찾을 수 없습니다."));
 
-        return placeReviewRepository.findByPlace(place)
+        return placeReviewRepository.findByPlace_Id(placeId)
                 .stream()
                 .map(PlaceReviewResponse::fromEntity)
                 .collect(Collectors.toList());
@@ -79,5 +79,9 @@ public class PlaceReviewService {
                 .stream()
                 .map(PlaceReviewResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    public List<PlaceReview> findByPlaceId(Long placeId) {
+        return placeReviewRepository.findByPlace_Id(placeId);
     }
 }

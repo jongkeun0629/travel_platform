@@ -51,7 +51,9 @@ export default function PlaceReviewPage() {
     try {
       if (editingId) {
         const updated = await updatePlaceReview(editingId, body);
-        setReviews((prev) => prev.map((r) => (r.id === editingId ? updated : r)));
+        setReviews((prev) =>
+          prev.map((r) => (r.id === editingId ? updated : r))
+        );
         setEditingId(null);
       } else {
         const created = await createPlaceReview(body);
@@ -126,17 +128,25 @@ export default function PlaceReviewPage() {
             className="w-24 border border-gray-600 bg-gray-900 rounded-lg px-3 py-2 outline-none"
           />
         </div>
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex gap-2 w-full">
           <input
             placeholder="키워드 검색 (장소명/내용)"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             className="w-full border border-gray-600 bg-gray-900 rounded-lg px-3 py-2 outline-none"
           />
-          <button onClick={doSearch} disabled={loading} className="px-3 py-2 rounded-lg border">
+          <button
+            onClick={doSearch}
+            disabled={loading}
+            className="px-3 py-2 rounded-lg border w-20"
+          >
             검색
           </button>
-          <button onClick={resetSearch} disabled={loading} className="px-3 py-2 rounded-lg border">
+          <button
+            onClick={resetSearch}
+            disabled={loading}
+            className="px-3 py-2 rounded-lg border w-25"
+          >
             초기화
           </button>
         </div>
@@ -153,18 +163,29 @@ export default function PlaceReviewPage() {
         <div className="flex items-center gap-3">
           <label className="text-gray-400 text-sm">별점</label>
           <input
-            type="number" min={1} max={5}
+            type="number"
+            min={1}
+            max={5}
             value={form.rating}
-            onChange={(e) => setForm({ ...form, rating: clampRating(e.target.value) })}
+            onChange={(e) =>
+              setForm({ ...form, rating: clampRating(e.target.value) })
+            }
             className="w-20 border border-gray-600 bg-gray-900 rounded-lg px-3 py-2 outline-none"
           />
           <div className="ml-auto flex gap-2">
-            <button type="submit" disabled={submitting} className="px-3 py-2 rounded-lg bg-blue-600 text-white">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-3 py-2 rounded-lg bg-blue-600 text-white"
+            >
               {editingId ? "수정" : "등록"}
             </button>
             <button
               type="button"
-              onClick={() => { setEditingId(null); setForm({ placeId, userId: 1, content: "", rating: 5 }); }}
+              onClick={() => {
+                setEditingId(null);
+                setForm({ placeId, userId: 1, content: "", rating: 5 });
+              }}
               disabled={submitting}
               className="px-3 py-2 rounded-lg border"
             >
@@ -179,16 +200,26 @@ export default function PlaceReviewPage() {
         <div className="text-gray-400">불러오는 중…</div>
       ) : (
         <div className="grid gap-3">
-          {items.length === 0 && <div className="text-gray-400 text-sm">후기가 없습니다.</div>}
+          {items.length === 0 && (
+            <div className="text-gray-400 text-sm">후기가 없습니다.</div>
+          )}
           {items.map((r) => (
             <article key={r.id} className="bg-gray-800 rounded-xl p-4">
               <div className="flex justify-between">
                 <h3 className="text-lg font-semibold">리뷰 #{r.id}</h3>
                 <div className="flex gap-2">
-                  <button onClick={() => onEdit(r)} disabled={submitting} className="px-3 py-1 rounded-lg border">
+                  <button
+                    onClick={() => onEdit(r)}
+                    disabled={submitting}
+                    className="px-3 py-1 rounded-lg border"
+                  >
                     수정
                   </button>
-                  <button onClick={() => onDelete(r.id)} disabled={submitting} className="px-3 py-1 rounded-lg bg-red-600 text-white">
+                  <button
+                    onClick={() => onDelete(r.id)}
+                    disabled={submitting}
+                    className="px-3 py-1 rounded-lg bg-red-600 text-white"
+                  >
                     삭제
                   </button>
                 </div>
