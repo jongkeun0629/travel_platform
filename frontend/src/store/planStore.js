@@ -104,13 +104,25 @@ const usePlanStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       await planService.deletePlan(planId);
-      set((state) => ({
-        plans: state.plans.filter((p) => p.id !== planId),
-        loading: false,
-      }));
+
+      // 상태에서 해당 플랜 제거 (planId 혹은 id 필드 모두 커버)
+      set((state) => {
+        const normalizeId = (p) => p?.planId ?? p?.id;
+        return {
+          userPlans: (state.userPlans || []).filter(
+            (p) => normalizeId(p) !== planId
+          ),
+          plans: (state.plans || []).filter((p) => normalizeId(p) !== planId),
+          loading: false,
+          error: null,
+        };
+      });
     } catch (err) {
       console.error("deletePlan error:", err);
-      set({ loading: false, error: err.message || "Delete failed" });
+      set({
+        loading: false,
+        error: err?.response?.data || err.message || "Delete failed",
+      });
       throw err;
     }
   },
