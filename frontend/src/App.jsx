@@ -68,7 +68,7 @@ export default function App() {
 
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/oauth2/callback" element={<OAuthRedirectHandler/>} />
+            <Route path="/oauth2/callback" element={<OAuthRedirectHandler />} />
           </Routes>
         </div>
       </div>
