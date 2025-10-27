@@ -10,18 +10,15 @@ import {
 const clampRating = (v) => Math.min(5, Math.max(1, Number(v) || 1));
 
 export default function PlaceReviewPage() {
-  const [placeId, setPlaceId] = useState(1);
-  const [keyword, setKeyword] = useState("");
+  const [placeId, setPlaceId] = useState(1);       // 조회용 placeId (숫자)
+  const [keyword, setKeyword] = useState("");      // 검색어(q: placeName 또는 content)
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({
-    placeId: 1,
-    userId: 1,
-    content: "",
-    rating: 5,
-  });
+
+  // 작성 폼: 서버가 placeId, userId, content, rating 받는다고 가정
+  const [form, setForm] = useState({ placeId: 1, userId: 1, content: "", rating: 5 });
 
   const items = useMemo(() => reviews, [reviews]);
 
@@ -32,16 +29,16 @@ export default function PlaceReviewPage() {
       setReviews(data);
       setForm((f) => ({ ...f, placeId }));
     } catch (e) {
-      console.error(e);
-      alert("후기 목록을 불러오지 못했습니다.");
+      console.error("place reviews load failed", e);
+      // 404/204는 서비스에서 []로 반환됨
+      if (!reviews.length) setReviews([]);
+      else alert("후기 목록을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    load();
-  }, [placeId]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [placeId]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -49,7 +46,7 @@ export default function PlaceReviewPage() {
     if (submitting) return;
     setSubmitting(true);
 
-    const body = { ...form, rating: clampRating(form.rating), placeId };
+    const body = { ...form, placeId, rating: clampRating(form.rating) };
 
     try {
       if (editingId) {
@@ -74,7 +71,7 @@ export default function PlaceReviewPage() {
   const onEdit = (r) => {
     setEditingId(r.id);
     setForm({
-      placeId: r.placeId,
+      placeId: r.placeId ?? placeId,
       userId: r.userId ?? 1,
       content: r.content ?? "",
       rating: r.rating ?? 5,
@@ -95,10 +92,11 @@ export default function PlaceReviewPage() {
   };
 
   const doSearch = async () => {
-    if (!keyword.trim()) return;
+    const q = keyword.trim();
+    if (!q) return;
     setLoading(true);
     try {
-      const data = await searchPlaceReviews(keyword.trim());
+      const data = await searchPlaceReviews(q); // ✅ 서버: placeName OR content LIKE
       setReviews(data);
     } catch (e) {
       console.error(e);
@@ -113,9 +111,11 @@ export default function PlaceReviewPage() {
     await load();
   };
 
+  const headerPlaceName = reviews[0]?.placeName || "Place Reviews";
+
   return (
     <div className="max-w-3xl mx-auto p-6 grid gap-4">
-      <h1 className="text-2xl font-bold">장소 후기 (Place Reviews)</h1>
+      <h1 className="text-2xl font-bold">장소 후기 ({headerPlaceName})</h1>
 
       {/* placeId 선택 & 검색 */}
       <div className="bg-gray-800 rounded-xl p-4 flex gap-2 items-center">
@@ -130,7 +130,7 @@ export default function PlaceReviewPage() {
         </div>
         <div className="ml-auto flex gap-2 w-full">
           <input
-            placeholder="키워드 검색"
+            placeholder="키워드 검색 (장소명/내용)"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             className="w-full border border-gray-600 bg-gray-900 rounded-lg px-3 py-2 outline-none"
@@ -224,11 +224,12 @@ export default function PlaceReviewPage() {
                   </button>
                 </div>
               </div>
-              <p className="text-gray-200 whitespace-pre-wrap mt-1">
-                {r.content}
-              </p>
+
+              <p className="text-gray-200 whitespace-pre-wrap mt-1">{r.content}</p>
+
               <div className="text-sm text-gray-400 mt-1">
-                장소: {r.placeId} · 별점: {r.rating}
+                {/* ✅ placeId 대신 placeName 표기 */}
+                장소: {r.placeName || "(미정)"} · 별점: {r.rating}
                 {r.username && <> · 작성자: {r.username}</>}
               </div>
             </article>
