@@ -34,7 +34,9 @@ export default function HomePage() {
     }
   };
 
-  const myPlans = plans.filter((plan) => plan.user.username === user.username);
+  const myPlans = userPlans.filter(
+    (plan) => plan.user.username === user.username
+  );
 
   return (
     <div className="space-y-8">
