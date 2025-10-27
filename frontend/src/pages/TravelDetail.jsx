@@ -192,7 +192,7 @@ export default function TravelDetail() {
 
   // 예약 정보 출력
   const renderReservationInfo = (res) => {
-    console.log("🔍 렌더링할 예약 데이터:", res); // ✅ 디버깅
+    console.log("🔍 렌더링할 예약 데이터:", res); // 디버깅
 
     // 날짜만 출력 (YYYY-MM-DD)
     const formatDate = (dateStr) => {
@@ -254,7 +254,7 @@ export default function TravelDetail() {
       return (
         <div className="space-y-1">
           {fields.map((field, idx) => (
-            <p key={idx} className="text-gray-300">
+            <p key={idx} className="text-gray-800">
               <span className="font-semibold">{field.label}:</span>{" "}
               {field.value}
             </p>
@@ -297,7 +297,7 @@ export default function TravelDetail() {
       return (
         <div className="space-y-1">
           {fields.map((field, idx) => (
-            <p key={idx} className="text-gray-300">
+            <p key={idx} className="text-gray-800">
               <span className="font-semibold">{field.label}:</span>{" "}
               {field.value}
             </p>
@@ -330,7 +330,7 @@ export default function TravelDetail() {
       return (
         <div className="space-y-1">
           {fields.map((field, idx) => (
-            <p key={idx} className="text-gray-300">
+            <p key={idx} className="text-gray-800">
               <span className="font-semibold">{field.label}:</span>{" "}
               {field.value}
             </p>
@@ -1272,9 +1272,9 @@ export default function TravelDetail() {
   /* ------------------------------
       렌더링
   ------------------------------ */
-  if (loading) return <div className="p-8 text-gray-400">로딩 중...</div>;
+  if (loading) return <div className="p-8 text-gray-600">로딩 중...</div>;
   if (!plan)
-    return <div className="p-8 text-gray-400">계획을 찾을 수 없습니다.</div>;
+    return <div className="p-8 text-gray-600">계획을 찾을 수 없습니다.</div>;
 
   const renderContent = () => {
     switch (selectedMenu) {
@@ -1283,21 +1283,25 @@ export default function TravelDetail() {
           <div>
             <h2 className="text-3xl font-bold mb-4">🧭 여행 정보</h2>
 
-            <p className="mb-2 text-lg">
+            <p className="mb-2 text-lg text-gray-800">
               작성자: {plan.user?.username || "알 수 없음"}
             </p>
-            <p className="mb-2 text-lg">여행 도시: {plan.destination}</p>
-            <p className="mb-2 text-lg">
+            <p className="mb-2 text-lg text-gray-800">
+              여행 도시: {plan.destination}
+            </p>
+            <p className="mb-2 text-lg text-gray-800">
               여행 기간: {new Date(plan.startDate).toLocaleDateString()} ~{" "}
               {new Date(plan.endDate).toLocaleDateString()}
             </p>
-            <p className="mb-2 text-lg">여행 타입: {plan.type}</p>
-            <p className="mb-2 text-lg">공개 여부: {plan.visibility}</p>
+            <p className="mb-2 text-lg text-gray-800">여행 타입: {plan.type}</p>
+            <p className="mb-2 text-lg text-gray-800">
+              공개 여부: {plan.visibility}
+            </p>
 
             {isOwner && (
               <button
                 onClick={() => setEditInfoOpen(true)}
-                className="bg-gray-800 hover:bg-gray-700 mt-4 px-4 py-2 rounded-lg text-lg"
+                className="bg-blue-600 hover:bg-blue-700 mt-4 px-4 py-2 rounded-lg text-lg text-gray-200"
               >
                 수정
               </button>
@@ -1329,14 +1333,14 @@ export default function TravelDetail() {
             {isOwner && (
               <div className="mb-4 flex gap-2">
                 <input
-                  className="bg-gray-800 border border-gray-700 p-2 rounded-lg text-lg w-full"
+                  className="bg-gray-100 border border-gray-600 p-2 rounded-lg text-lg w-full"
                   value={newChecklist}
                   onChange={(e) => setNewChecklist(e.target.value)}
                   placeholder="항목 추가 (예: 여권)"
                 />
                 <button
                   onClick={handleAddChecklist}
-                  className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-lg font-semibold"
+                  className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-lg font-semibold text-gray-200"
                 >
                   +
                 </button>
@@ -1347,7 +1351,7 @@ export default function TravelDetail() {
               {checklistItems.map((item, index) => (
                 <li
                   key={item.id ?? index}
-                  className="flex justify-between items-center bg-gray-800 p-3 mb-2 rounded-lg shadow-md text-lg"
+                  className="flex justify-between items-center bg-gray-100 p-3 mb-2 rounded-lg shadow-md text-lg"
                 >
                   <div className="flex items-center gap-5">
                     <input
@@ -1368,7 +1372,7 @@ export default function TravelDetail() {
                   {isOwner && (
                     <button
                       onClick={() => handleRemoveChecklist(index)}
-                      className="text-red-400 hover:text-red-500 text-xl"
+                      className="text-red-600 hover:text-red-700 text-xl"
                     >
                       ✕
                     </button>
@@ -1389,7 +1393,7 @@ export default function TravelDetail() {
               <>
                 <div className="grid md:grid-cols-4 gap-3 mb-6">
                   <div>
-                    <p className="text-gray-300 mb-4">📅 날짜를 선택하세요</p>
+                    <p className="text-gray-800 mb-4">📅 날짜를 선택하세요</p>
                     <input
                       type="date"
                       value={
@@ -1405,12 +1409,12 @@ export default function TravelDetail() {
                             })
                           : setNewPlan({ ...newPlan, date: e.target.value })
                       }
-                      className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
+                      className="bg-gray-100 border border-gray-600 p-2 rounded-lg w-full"
                     />
                   </div>
 
                   <div>
-                    <p className="text-gray-300 mb-4">🕒 시간을 선택하세요</p>
+                    <p className="text-gray-800 mb-4">🕒 시간을 선택하세요</p>
                     <input
                       type="time"
                       value={
@@ -1426,12 +1430,12 @@ export default function TravelDetail() {
                             })
                           : setNewPlan({ ...newPlan, time: e.target.value })
                       }
-                      className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
+                      className="bg-gray-100 border border-gray-600 p-2 rounded-lg w-full"
                     />
                   </div>
 
                   <div>
-                    <p className="text-gray-300 mb-4">📍 장소를 입력하세요</p>
+                    <p className="text-gray-800 mb-4">📍 장소를 입력하세요</p>
                     <div className="flex">
                       <input
                         placeholder="장소"
@@ -1451,7 +1455,7 @@ export default function TravelDetail() {
                               })
                             : setNewPlan({ ...newPlan, place: e.target.value })
                         }
-                        className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full mr-2"
+                        className="bg-gray-100 border border-gray-600 p-2 rounded-lg w-full mr-2"
                       />
                       <button
                         onClick={() => handleOpenModal("place")}
@@ -1463,7 +1467,7 @@ export default function TravelDetail() {
                   </div>
 
                   <div>
-                    <p className="text-gray-300 mb-4">✏️ 내용을 작성하세요</p>
+                    <p className="text-gray-800 mb-4">✏️ 내용을 작성하세요</p>
                     <input
                       placeholder="내용"
                       value={
@@ -1479,7 +1483,7 @@ export default function TravelDetail() {
                             })
                           : setNewPlan({ ...newPlan, content: e.target.value })
                       }
-                      className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
+                      className="bg-gray-100 border border-gray-600 p-2 rounded-lg w-full"
                     />
                   </div>
                 </div>
@@ -1515,12 +1519,12 @@ export default function TravelDetail() {
             )}
 
             {(travelData.itinerary || []).length === 0 ? (
-              <p className="text-gray-400 text-center">아직 일정이 없습니다.</p>
+              <p className="text-gray-600 text-center">아직 일정이 없습니다.</p>
             ) : (
               (travelData.itinerary || []).map((p, idx) => (
                 <div
                   key={p.id ?? idx}
-                  className="bg-gray-800 p-4 rounded-lg mb-3 shadow-md flex justify-between items-center hover:shadow-lg transition"
+                  className="bg-gray-100 p-4 rounded-lg mb-3 shadow-md flex justify-between items-center hover:shadow-lg transition"
                 >
                   <div>
                     <p className="font-semibold text-xl mb-2">
@@ -1529,7 +1533,7 @@ export default function TravelDetail() {
                     {p.place && (
                       <button
                         onClick={() => openKakaoMap(p.place)}
-                        className="text-blue-400 hover:underline mb-2 text-xl"
+                        className="text-blue-600 hover:underline mb-2 text-xl"
                       >
                         📍 {p.place}
                       </button>
@@ -1547,7 +1551,7 @@ export default function TravelDetail() {
                       </button>
                       <button
                         onClick={() => handleRemovePlan(idx)}
-                        className="text-red-400 hover:text-red-500 text-xl"
+                        className="text-red-600 hover:text-red-700 text-xl"
                       >
                         ✕
                       </button>
@@ -1573,15 +1577,15 @@ export default function TravelDetail() {
                   <select
                     value={reservationType}
                     onChange={(e) => setReservationType(e.target.value)}
-                    className="bg-gray-800 border border-gray-700 p-2 rounded-lg"
+                    className="bg-gray-100 border border-gray-600 p-2 rounded-lg"
                   >
                     <option>교통</option>
                     <option>숙소</option>
                     <option>음식점</option>
                   </select>
                 </div>
-                <div className="bg-gray-800 p-4 rounded-lg mb-6">
-                  <p className="text-gray-300 mb-3 text-lg font-medium">
+                <div className="bg-gray-100 p-4 rounded-lg mb-6">
+                  <p className="text-gray-900 mb-3 text-lg font-medium">
                     ✏️ {reservationType} 예약 정보를 입력하세요.
                   </p>
 
@@ -1611,7 +1615,7 @@ export default function TravelDetail() {
                               [f]: e.target.value,
                             });
                           }}
-                          className="bg-gray-900 border border-gray-700 p-2 rounded-lg w-full"
+                          className="bg-gray-100 border border-gray-600 p-2 rounded-lg w-full"
                         />
                         {isSearchable && (
                           <button
@@ -1658,19 +1662,18 @@ export default function TravelDetail() {
             )}
 
             {(travelData.reservations || []).length === 0 ? (
-              <p className="text-gray-400 text-center">
+              <p className="text-gray-600 text-center">
                 등록된 예약이 없습니다.
               </p>
             ) : (
               (travelData.reservations || []).map((res, idx) => {
-                console.log(`🎫 예약 ${idx} 렌더링:`, res); // ✅ 디버깅
                 return (
                   <div
                     key={res.id ?? idx}
-                    className="bg-gray-800 p-4 rounded-lg mb-3 shadow-md flex justify-between hover:shadow-lg transition"
+                    className="bg-gray-100 p-4 rounded-lg mb-3 shadow-md flex justify-between hover:shadow-lg transition"
                   >
                     <div className="w-full">
-                      <p className="text-xl font-semibold mb-2 text-blue-400">
+                      <p className="text-xl font-semibold mb-2 text-blue-500">
                         {res.type === "TransportReservation" ||
                         res.type === "교통"
                           ? "🚌 교통 예약"
@@ -1691,13 +1694,13 @@ export default function TravelDetail() {
                       <div className="flex items-center ml-4">
                         <button
                           onClick={() => startEditReservation(idx)}
-                          className="mr-5 text-xl text-blue-400 hover:text-blue-300"
+                          className="mr-5 text-xl text-blue-600 hover:text-blue-700"
                         >
                           <FaRegEdit />
                         </button>
                         <button
                           onClick={() => handleRemoveReservation(idx)}
-                          className="text-red-400 hover:text-red-500 text-xl"
+                          className="text-red-600 hover:text-red-700 text-xl"
                         >
                           ✕
                         </button>
@@ -1717,12 +1720,12 @@ export default function TravelDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
+    <div className="min-h-screen bg-gray-200 mt-8 p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-4xl font-bold">{plan.title}</h1>
         <div className="flex gap-2">
           <Link to="/">
-            <button className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-lg">
+            <button className="bg-gray-600 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg text-lg">
               홈으로
             </button>
           </Link>
@@ -1730,7 +1733,7 @@ export default function TravelDetail() {
           {isOwner && (
             <button
               onClick={handleDeletePlan}
-              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-lg"
+              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-lg text-gray-100"
             >
               삭제
             </button>
@@ -1745,8 +1748,8 @@ export default function TravelDetail() {
             onClick={() => setSelectedMenu(tab)}
             className={`px-6 py-3 transition-colors ${
               selectedMenu === tab
-                ? "border-b-2 border-blue-500 text-blue-400"
-                : "text-gray-400 hover:text-gray-200"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "text-gray-800 hover:text-gray-600"
             }`}
           >
             {tab === "info"
