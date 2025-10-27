@@ -18,6 +18,7 @@ import { useEffect } from "react";
 import useAuthStore from "./store/authStore";
 import TripReviewPage from "./pages/TripReviewPage";
 import PlaceReviewPage from "./pages/PlaceReviewPage";
+import PlanPage from "./pages/PlanPage";
 
 function AppLayout() {
   const user = useAuthStore((state) => state.user);
@@ -63,12 +64,13 @@ export default function App() {
               <Route path="/trip-reviews" element={<TripReviewPage />} />
               <Route path="/place-reviews" element={<PlaceReviewPage />} />
               <Route path="/traveldetail/:id" element={<TravelDetail />} />
+              <Route path="/plans" element={<PlanPage />} />
               <Route path="*" element={<NotFound />} />
             </Route>
 
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/oauth2/callback" element={<OAuthRedirectHandler/>} />
+            <Route path="/oauth2/callback" element={<OAuthRedirectHandler />} />
           </Routes>
         </div>
       </div>

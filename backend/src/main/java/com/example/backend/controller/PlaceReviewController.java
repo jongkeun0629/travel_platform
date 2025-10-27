@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.PlaceReviewRequest;
 import com.example.backend.dto.PlaceReviewResponse;
+import com.example.backend.entity.PlaceReview;
 import com.example.backend.service.PlaceReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,9 +37,14 @@ public class PlaceReviewController {
     }
 
     @GetMapping("/place/{placeId}")
-    public ResponseEntity<List<PlaceReviewResponse>> getReviewsByPlace(@PathVariable Long placeId) {
-        return ResponseEntity.ok(placeReviewService.getReviewsByPlace(placeId));
+    public ResponseEntity<List<PlaceReviewResponse>> getByPlace(@PathVariable Long placeId) {
+        List<PlaceReview> reviews = placeReviewService.findByPlaceId(placeId);
+        List<PlaceReviewResponse> result = reviews.stream()
+                .map(PlaceReviewResponse::fromEntity)
+                .toList();
+        return ResponseEntity.ok(result);
     }
+
 
     @GetMapping
     public ResponseEntity<List<PlaceReviewResponse>> getAllReviews() {

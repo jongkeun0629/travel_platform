@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -15,18 +16,39 @@ public class TripReviewInteractionController {
 
     private final TripReviewInteractionService interactionService;
 
+    // 응답용 로컬 DTO (파일 추가 없음)
+    record CommentDto(Long id, Long userId, String username, String content, LocalDateTime createdAt) {}
+
     @PostMapping("/{reviewId}/comments")
-    public ResponseEntity<TripReviewComment> addComment(
+    public ResponseEntity<CommentDto> addComment(
             @PathVariable Long reviewId,
             @RequestParam Long userId,
             @RequestParam String content
     ) {
-        return ResponseEntity.ok(interactionService.addComment(reviewId, userId, content));
+        TripReviewComment c = interactionService.addComment(reviewId, userId, content);
+        CommentDto dto = new CommentDto(
+                c.getId(),
+                c.getUser().getId(),
+                c.getUser().getUsername(),
+                c.getContent(),
+                c.getCreatedAt()
+        );
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/{reviewId}/comments")
-    public ResponseEntity<List<TripReviewComment>> getComments(@PathVariable Long reviewId) {
-        return ResponseEntity.ok(interactionService.getComments(reviewId));
+    public ResponseEntity<List<CommentDto>> getComments(@PathVariable Long reviewId) {
+        List<TripReviewComment> list = interactionService.getComments(reviewId);
+        List<CommentDto> dtoList = list.stream()
+                .map(c -> new CommentDto(
+                        c.getId(),
+                        c.getUser().getId(),
+                        c.getUser().getUsername(),
+                        c.getContent(),
+                        c.getCreatedAt()
+                ))
+                .toList();
+        return ResponseEntity.ok(dtoList);
     }
 
     @PostMapping("/{reviewId}/like")
