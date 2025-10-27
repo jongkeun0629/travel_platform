@@ -35,7 +35,6 @@ public class AuthenticationService {
         } else {
             username = authentication.getName();
         }
-        System.out.println(username);
         return userRepository.findByUsername(username)
                 .or(() -> userRepository.findByEmail(username))
                 .orElseThrow(() -> new ResourceNotFoundException("User not found for username: " + username));

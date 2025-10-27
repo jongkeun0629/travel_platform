@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import KakaoMap from "../components/Map/KakaoMap";
 import planService from "../services/plan";
+import api from "../services/api";
 
 export default function HomePage() {
   const navigate = useNavigate();
