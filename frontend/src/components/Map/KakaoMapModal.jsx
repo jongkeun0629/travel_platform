@@ -23,21 +23,21 @@ export default function KakaoMapModal({ onSelect, onClose }) {
   }, [keyword]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-gray-900 p-4 rounded-lg w-11/12 max-w-xl">
-        <h3 className="text-lg font-semibold mb-4 text-gray-100">장소 검색</h3>
+    <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-amber-300 p-4 rounded-lg w-11/12 max-w-xl">
+        <h3 className="text-lg font-semibold mb-4 text-gray-800">장소 검색</h3>
         <input
           type="text"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="장소를 입력하세요"
-          className="w-full p-2 mb-3 rounded-lg border border-gray-700 bg-gray-800 text-gray-100"
+          className="w-full p-2 mb-3 rounded-lg border border-gray-700 bg-gray-100 text-gray-800"
         />
         <div className="max-h-64 overflow-y-auto">
           {results.map((place) => (
             <div
               key={place.id}
-              className="p-2 mb-1 rounded hover:bg-gray-700 cursor-pointer text-gray-100"
+              className="p-2 mb-1 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer text-gray-800"
               onClick={() =>
                 onSelect({
                   address: place.address_name || place.road_address_name,
@@ -60,7 +60,7 @@ export default function KakaoMapModal({ onSelect, onClose }) {
         <div className="flex justify-end">
           <button
             onClick={onClose}
-            className="mt-3 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white"
+            className="mt-3 bg-gray-800 hover:bg-gray-600 px-4 py-2 rounded-lg text-white"
           >
             닫기
           </button>
