@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -90,8 +89,14 @@ export default function LoginPage() {
           </button>
         </form>
         <div>
-            <button onClick={() => handleSocialLogin('google')} className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">구글로 로그인</button>
-            
+          <button
+            onClick={() => handleSocialLogin("google")}
+            className="w-full mt-5 bg-white text-black font-bold py-2.5 rounded-lg hover:bg-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <div className="flex justify-center gap-2">
+              <FcGoogle className="w-6 h-6" /> <p>구글로 로그인</p>
+            </div>
+          </button>
         </div>
 
         {error && (
