@@ -50,7 +50,7 @@ const KakaoMap = ({ onAddressClick }) => {
 
   return (
     <div className="rounded-xl overflow-hidden shadow-lg">
-      <div id="kakao-map" className="w-full h-80">
+      <div id="kakao-map" className="w-full h-135">
         <Map
           center={center}
           level={3}

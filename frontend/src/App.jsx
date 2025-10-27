@@ -47,7 +47,7 @@ function AppLayout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="bg-gray-900 text-gray-200 min-h-screen font-sans">
+      <div className="bg-gray-100 text-black min-h-screen font-sans">
         <div className="container mx-auto p-4 md:p-8 max-w-4xl">
           <Routes>
             {/* 인증 필요한 영역 */}

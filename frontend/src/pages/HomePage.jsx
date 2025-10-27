@@ -42,9 +42,9 @@ export default function HomePage() {
   return (
     <div className="space-y-8">
       {/* 여행 계획 목록 */}
-      <div className="bg-gray-800 p-6 rounded-xl shadow-md mt-5">
+      <div className="bg-gray-200 p-6 rounded-xl shadow-md mt-5">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold text-gray-200">
+          <h3 className="text-xl font-semibold text-gray-900">
             🧳 내 여행 계획
           </h3>
 
@@ -52,7 +52,7 @@ export default function HomePage() {
           {myPlans.length > 0 && (
             <Link
               to="/createplan"
-              className="text-blue-400 hover:underline font-semibold"
+              className="text-blue-600 hover:underline font-semibold"
             >
               여행 시작하기
             </Link>
@@ -60,16 +60,16 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <p className="text-gray-400 text-center py-6">로딩 중...</p>
+          <p className="text-gray-700 text-center py-6">로딩 중...</p>
         ) : error ? (
-          <p className="text-red-400 text-center py-6">{error}</p>
+          <p className="text-red-600 text-center py-6">{error}</p>
         ) : myPlans.length === 0 ? (
           // 내 계획 없을 때
           <div className="text-center py-12">
-            <p className="text-gray-400 mb-4">아직 여행 계획이 없습니다.</p>
+            <p className="text-gray-700 mb-4">아직 여행 계획이 없습니다.</p>
             <Link
               to="/createplan"
-              className="text-blue-400 hover:underline text-2xl font-semibold"
+              className="text-blue-600 hover:underline text-2xl font-semibold"
             >
               여행 시작하기
             </Link>
@@ -79,23 +79,23 @@ export default function HomePage() {
             {myPlans.map((plan) => (
               <div
                 key={plan.id}
-                className="bg-gray-900 p-4 rounded-lg  hover:shadow-lg transition flex flex-col justify-between"
+                className="bg-gray-100 border border-blue-100 p-4 rounded-lg  hover:shadow-lg transition flex flex-col justify-between"
               >
                 <div>
-                  <h4 className="text-xl font-bold text-blue-400 mb-2">
+                  <h4 className="text-xl font-bold text-blue-600 mb-2">
                     {plan.title}
                   </h4>
-                  <p className="text-gray-400">
+                  <p className="text-gray-700">
                     작성자: {plan.user.username || "알 수 없음"}
                   </p>
-                  <p className="text-gray-400">
+                  <p className="text-gray-700">
                     도시: {plan.destination || "미정"}
                   </p>
-                  <p className="text-gray-400">
+                  <p className="text-gray-700">
                     여행 기간: {new Date(plan.startDate).toLocaleDateString()} ~{" "}
                     {new Date(plan.endDate).toLocaleDateString()}
                   </p>
-                  <p className="text-gray-400">
+                  <p className="text-gray-700">
                     타입: {plan.type}, 공개 여부: {plan.visibility}
                   </p>
                 </div>
@@ -103,13 +103,13 @@ export default function HomePage() {
                 <div className="flex justify-between items-center mt-4">
                   <Link
                     to={`/traveldetail/${plan.planId}`}
-                    className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white"
+                    className="bg-blue-600 hover:bg-blue-700 font-semibold px-4 py-2 rounded-lg text-white"
                   >
                     보기
                   </Link>
                   <button
                     onClick={() => handleDeletePlan(plan.planId)}
-                    className="text-red-400 hover:text-red-500"
+                    className="text-red-400 hover:text-red-500 font-semibold"
                   >
                     ✕ 삭제
                   </button>
@@ -121,7 +121,7 @@ export default function HomePage() {
       </div>
 
       {/* 지도 */}
-      <div className="bg-gray-800 p-6 rounded-xl shadow-md">
+      <div className="bg-gray-200 p-6 rounded-xl shadow-md h-150">
         <KakaoMap />
       </div>
     </div>

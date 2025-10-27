@@ -180,7 +180,7 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
     selectedVisibility;
 
   return (
-    <div className="p-6 bg-gray-900 text-white">
+    <div className="p-6 bg-gray-200 mt-8">
       {/* 헤더 */}
       <div className="flex justify-between items-center mb-6">
         <div></div>
@@ -190,13 +190,13 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
         {onCancel ? (
           <button
             onClick={onCancel}
-            className="text-5xl text-gray-400 hover:text-white"
+            className="text-5xl text-gray-600 hover:text-gray-700"
           >
             <IoIosClose />
           </button>
         ) : (
           <Link to="/">
-            <button className="text-5xl text-gray-400 hover:text-white">
+            <button className="text-5xl text-gray-600 hover:text-gray-700">
               <IoIosClose />
             </button>
           </Link>
@@ -214,7 +214,7 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
           placeholder="예: 2025 제주 한 달 살기"
           value={travelTitle}
           onChange={(e) => setTravelTitle(e.target.value)}
-          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white"
+          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-100"
         />
       </div>
 
@@ -229,17 +229,17 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
           placeholder="도시를 검색하세요"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white"
+          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-100"
         />
       </div>
 
       {/* 도시 리스트 */}
-      <div className="max-h-80 overflow-y-auto border border-gray-600 rounded-lg p-3 mb-8 bg-gray-800">
+      <div className="max-h-80 overflow-y-auto border border-gray-600 rounded-lg p-3 mb-8 bg-gray-100">
         {filteredCities.length > 0 ? (
           filteredCities.map((city) => (
             <div
               key={city.id}
-              className="flex items-center p-2 rounded-md hover:bg-gray-700"
+              className="flex items-center p-2 rounded-md hover:bg-blue-200"
             >
               <input
                 type="checkbox"
@@ -272,7 +272,7 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
           endDate={endDate}
           onChange={(dates) => handleDateChange(dates)}
           dateFormat="yyyy-MM-dd"
-          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800"
+          className="w-full p-3 border border-gray-600 rounded-lg bg-gray-100"
         />
       </div>
 
@@ -284,7 +284,9 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
             <label
               key={type.id}
               className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer ${
-                selectedType === type.id ? "bg-blue-600" : "bg-gray-800"
+                selectedType === type.id
+                  ? "bg-blue-600 text-gray-200"
+                  : "bg-gray-100"
               }`}
             >
               <input
@@ -310,8 +312,8 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
               key={option.id}
               className={`flex items-center justify-center p-3 border rounded-lg cursor-pointer ${
                 selectedVisibility === option.id
-                  ? "bg-green-600"
-                  : "bg-gray-800"
+                  ? "bg-blue-600 text-gray-200"
+                  : "bg-gray-100"
               }`}
             >
               <input
@@ -332,8 +334,8 @@ export function CreatePlanForm({ initialData = null, onCancel, onSave }) {
       <button
         onClick={handleComplete}
         disabled={!isFormValid || saving}
-        className={`w-full p-4 text-xl font-bold rounded-lg ${
-          isFormValid ? "bg-blue-600" : "bg-gray-600"
+        className={`w-full p-4 text-xl font-bold rounded-lg text-gray-200 ${
+          isFormValid ? "bg-blue-600" : "bg-gray-400"
         }`}
       >
         {saving ? "저장 중..." : onSave ? "저장" : "다음"}
