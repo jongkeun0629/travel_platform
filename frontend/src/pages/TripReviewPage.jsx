@@ -1,4 +1,3 @@
-// src/pages/TripReviewPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
@@ -115,7 +114,7 @@ export default function TripReviewPage() {
         setReviews((prev) => [
           {
             ...(created ?? {}),
-            id: (created?.id ?? created?.tripReviewId),
+            id: created?.id ?? created?.tripReviewId,
             likeCount: 0,
             liked: false,
             commentCount: 0,
@@ -202,7 +201,9 @@ export default function TripReviewPage() {
 
   const ensureCommentState = (reviewId) => {
     setCommentState((s) =>
-      s[reviewId] ? s : { ...s, [reviewId]: { list: [], loading: false, input: "" } }
+      s[reviewId]
+        ? s
+        : { ...s, [reviewId]: { list: [], loading: false, input: "" } }
     );
   };
 
@@ -254,7 +255,11 @@ export default function TripReviewPage() {
     }));
 
     try {
-      const saved = await createTripReviewComment(reviewId, { content }, user.id);
+      const saved = await createTripReviewComment(
+        reviewId,
+        { content },
+        user.id
+      );
       setCommentState((s) => ({
         ...s,
         [reviewId]: {
@@ -278,175 +283,227 @@ export default function TripReviewPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 grid gap-4">
-      <h1 className="text-2xl font-bold">여행 후기 (Trip Reviews)</h1>
+    <div className="flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-3xl p-6 mx-auto bg-gray-200 rounded-2xl shadow-xl sm:p-8">
+        <h1 className="mb-6 text-3xl font-bold text-center text-gray-900">
+          여행 후기
+        </h1>
 
-      <div className="flex gap-2">
-        <input
-          placeholder="지역 필터 (예: 서울)"
-          value={regionFilter}
-          onChange={(e) => setRegionFilter(e.target.value)}
-          className="w-full border border-gray-600 bg-gray-800 rounded-lg px-3 py-2 outline-none"
-        />
-        <button
-          onClick={load}
-          disabled={loading}
-          className="px-3 py-2 rounded-lg border bg-white text-black w-20"
-        >
-          검색
-        </button>
-        <button
-          onClick={() => {
-            setRegionFilter("");
-            load();
-          }}
-          disabled={loading}
-          className="px-3 py-2 rounded-lg border w-25"
-        >
-          초기화
-        </button>
-      </div>
-
-      <form onSubmit={submit} className="bg-gray-800 rounded-xl p-4 grid gap-3">
-        <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+        <div className="flex gap-2 p-4">
           <input
-            placeholder="제목"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="w-full border border-gray-600 bg-gray-900 rounded-lg px-3 py-2 outline-none"
+            placeholder="지역 필터 (예: 서울)"
+            value={regionFilter}
+            onChange={(e) => setRegionFilter(e.target.value)}
+            className="flex-[5] px-4 py-3 text-gray-800 rounded-lg focus:outline-none bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:bg-white"
           />
-          <input
-            placeholder="지역 (예: 서울)"
-            value={form.region}
-            onChange={(e) => setForm({ ...form, region: e.target.value })}
-            className="w-full border border-gray-600 bg-gray-900 rounded-lg px-3 py-2 outline-none"
-          />
+          <button
+            onClick={load}
+            disabled={loading}
+            className="flex-1 px-3 py-2 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+          >
+            검색
+          </button>
+          <button
+            onClick={() => {
+              setRegionFilter("");
+              load();
+            }}
+            disabled={loading}
+            className="flex-1 px-3 py-2 font-medium text-gray-700 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors duration-200"
+          >
+            초기화
+          </button>
         </div>
-        <textarea
-          placeholder="내용"
-          value={form.content}
-          onChange={(e) => setForm({ ...form, content: e.target.value })}
-          className="w-full border border-gray-600 bg-gray-900 rounded-lg px-3 py-2 outline-none min-h-[100px]"
-        />
-        <div className="flex items-center gap-3">
-          <label className="text-gray-400 text-sm">별점</label>
-          <input
-            type="number"
-            min={1}
-            max={5}
-            value={form.rating}
-            onChange={(e) =>
-              setForm({ ...form, rating: clampRating(e.target.value) })
-            }
-            className="w-20 border border-gray-600 bg-gray-900 rounded-lg px-3 py-2 outline-none"
-          />
-          <div className="ml-auto flex gap-2">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-3 py-2 rounded-lg bg-blue-600 text-white"
-            >
-              {editingId ? "수정" : "등록"}
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                setForm({ title: "", content: "", region: "", rating: 5, userId: user?.id ?? 1, planId: 1 })
-              }
-              disabled={submitting}
-              className="px-3 py-2 rounded-lg border"
-            >
-              초기화
-            </button>
-          </div>
+
+        <div className="pt-4 pb-6 space-x-4 border-t border-gray-300">
+          <form onSubmit={submit} className="space-y-8">
+            <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+              <input
+                placeholder="제목"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                className="w-full px-4 py-3 text-gray-800 rounded-lg focus:outline-none bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:bg-white"
+              />
+              <input
+                placeholder="지역 (예: 서울)"
+                value={form.region}
+                onChange={(e) => setForm({ ...form, region: e.target.value })}
+                className="w-full px-4 py-3 text-gray-800 rounded-lg focus:outline-none bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:bg-white"
+              />
+            </div>
+            <textarea
+              placeholder="내용"
+              value={form.content}
+              onChange={(e) => setForm({ ...form, content: e.target.value })}
+              className="w-full px-4 py-3 text-gray-800 rounded-lg focus:outline-none bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:bg-white"
+            />
+            <div className="flex items-center gap-3">
+              <label className="text-gray-500 text-md">별점</label>
+              <input
+                type="number"
+                min={1}
+                max={5}
+                value={form.rating}
+                onChange={(e) =>
+                  setForm({ ...form, rating: clampRating(e.target.value) })
+                }
+                className=" px-4 py-3 text-gray-800 rounded-lg focus:outline-none bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:bg-white"
+              />
+              <div className="ml-auto flex gap-2">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-3 py-2 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                >
+                  {editingId ? "수정" : "등록"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm({
+                      title: "",
+                      content: "",
+                      region: "",
+                      rating: 5,
+                      userId: user?.id ?? 1,
+                      planId: 1,
+                    })
+                  }
+                  disabled={submitting}
+                  className="px-3 py-2 font-medium text-gray-700 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors duration-200"
+                >
+                  초기화
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
-      </form>
 
-      {loading ? (
-        <div className="text-gray-400">불러오는 중…</div>
-      ) : (
-        <div className="grid gap-3">
-          {items.length === 0 && <div className="text-gray-400 text-sm">후기가 없습니다.</div>}
-          {items.map((r) => {
-            const cs = commentState[r.id] || { list: [], loading: false, input: "" };
-            return (
-              <article key={r.id} className="bg-gray-800 rounded-xl p-4 grid gap-2">
-                <div className="flex justify-between">
-                  <h3 className="text-lg font-semibold">{r.title ?? `리뷰 #${r.id}`}</h3>
-                  <div className="flex gap-2">
-                    <button onClick={() => onEdit(r)} disabled={submitting} className="px-3 py-1 rounded-lg border">
-                      수정
-                    </button>
-                    <button onClick={() => onDelete(r.id)} disabled={submitting} className="px-3 py-1 rounded-lg bg-red-600 text-white">
-                      삭제
-                    </button>
-                  </div>
-                </div>
-
-                <p className="text-gray-200 whitespace-pre-wrap">{r.content}</p>
-                <div className="text-sm text-gray-400">
-                  지역: {r.region} · 별점: {r.rating}
-                  {r.username && <> · 작성자: {r.username}</>}
-                </div>
-
-                <div className="flex items-center gap-3 mt-1">
-                  <button
-                    type="button"
-                    onClick={() => onToggleLike(r)}
-                    className={`px-2 py-1 rounded border ${r.liked ? "bg-blue-600 text-white" : ""}`}
+        <div className="pt-6 space-x-4 border-t border-gray-400">
+          {loading ? (
+            <div className="text-gray-500">불러오는 중…</div>
+          ) : (
+            <div className="grid gap-3">
+              {items.length === 0 && (
+                <div className="text-gray-500 text-sm">후기가 없습니다.</div>
+              )}
+              {items.map((r) => {
+                const cs = commentState[r.id] || {
+                  list: [],
+                  loading: false,
+                  input: "",
+                };
+                return (
+                  <article
+                    key={r.id}
+                    className="bg-gray-400 rounded-xl p-4 grid gap-2"
                   >
-                    👍 좋아요 {r.likeCount ?? 0}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => loadComments(r.id)}
-                    className="px-2 py-1 rounded border"
-                    disabled={cs.loading}
-                  >
-                    💬 댓글 {r.commentCount ?? cs.list.length ?? 0}
-                  </button>
-                </div>
-
-                {cs.list.length > 0 && (
-                  <div className="mt-2 grid gap-2">
-                    {cs.list.map((c) => (
-                      <div key={c.id} className="bg-gray-900 rounded-lg p-2">
-                        <div className="text-sm text-gray-400 flex justify-between">
-                          <span>{c.username ?? `user#${c.userId ?? ""}`}</span>
-                          <span>{c.createdAt ? new Date(c.createdAt).toLocaleString() : ""}</span>
-                        </div>
-                        <div className="text-gray-200 whitespace-pre-wrap">{c.content}</div>
+                    <div className="flex justify-between">
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {r.title ?? `리뷰 #${r.id}`}
+                      </h3>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => onEdit(r)}
+                          disabled={submitting}
+                          className="px-3 py-2 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                        >
+                          수정
+                        </button>
+                        <button
+                          onClick={() => onDelete(r.id)}
+                          disabled={submitting}
+                          className="px-3 py-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-700 transition-colors duration-200"
+                        >
+                          삭제
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    </div>
 
-                <div className="flex items-center gap-2 mt-2">
-                  <input
-                    value={cs.input || ""}
-                    onChange={(e) =>
-                      setCommentState((s) => ({
-                        ...s,
-                        [r.id]: { ...(s[r.id] ?? { list: [], loading: false }), input: e.target.value },
-                      }))
-                    }
-                    placeholder="댓글을 입력하세요"
-                    className="flex-1 border border-gray-600 bg-gray-900 rounded-lg px-3 py-2 outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => submitComment(r.id)}
-                    className="px-3 py-2 rounded-lg bg-white text-black border"
-                  >
-                    등록
-                  </button>
-                </div>
-              </article>
-            );
-          })}
+                    <p className="text-gray-800 whitespace-pre-wrap">
+                      {r.content}
+                    </p>
+                    <div className="text-sm text-gray-800">
+                      지역: {r.region} · 별점: {r.rating}
+                      {r.username && <> · 작성자: {r.username}</>}
+                    </div>
+
+                    <div className="flex items-center gap-3 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => onToggleLike(r)}
+                        className={`px-2 py-1 rounded border ${
+                          r.liked ? "bg-blue-600 text-white" : ""
+                        }`}
+                      >
+                        👍 좋아요 {r.likeCount ?? 0}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => loadComments(r.id)}
+                        className="px-2 py-1 rounded border text-gray-800"
+                        disabled={cs.loading}
+                      >
+                        💬 댓글 {r.commentCount ?? cs.list.length ?? 0}
+                      </button>
+                    </div>
+
+                    {cs.list.length > 0 && (
+                      <div className="mt-2 grid gap-2">
+                        {cs.list.map((c) => (
+                          <div
+                            key={c.id}
+                            className="bg-gray-300 border border-gray-300 rounded-lg p-2"
+                          >
+                            <div className="text-sm text-gray-700 flex justify-between">
+                              <span>
+                                {c.username ?? `user#${c.userId ?? ""}`}
+                              </span>
+                              <span>
+                                {c.createdAt
+                                  ? new Date(c.createdAt).toLocaleString()
+                                  : ""}
+                              </span>
+                            </div>
+                            <div className="text-gray-800 whitespace-pre-wrap">
+                              {c.content}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2 mt-2">
+                      <input
+                        value={cs.input || ""}
+                        onChange={(e) =>
+                          setCommentState((s) => ({
+                            ...s,
+                            [r.id]: {
+                              ...(s[r.id] ?? { list: [], loading: false }),
+                              input: e.target.value,
+                            },
+                          }))
+                        }
+                        placeholder="댓글을 입력하세요"
+                        className="flex-1 w-full px-4 py-3 text-gray-800 rounded-lg focus:outline-none bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => submitComment(r.id)}
+                        className="px-3 py-3 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                      >
+                        등록
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
