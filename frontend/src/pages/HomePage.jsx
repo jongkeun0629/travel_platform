@@ -69,7 +69,7 @@ export default function HomePage() {
             <p className="text-gray-400 mb-4">아직 여행 계획이 없습니다.</p>
             <Link
               to="/createplan"
-              className="text-blue-400 hover:underline text-xl font-semibold"
+              className="text-blue-400 hover:underline text-2xl font-semibold"
             >
               여행 시작하기
             </Link>
