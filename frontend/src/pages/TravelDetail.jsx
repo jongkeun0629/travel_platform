@@ -59,6 +59,89 @@ const getReservationFields = (type) => {
   }
 };
 
+const normalizeReservationForUi = (res) => {
+  if (!res) return res;
+  const normalized = { ...res };
+
+  // id normalization
+  normalized.id =
+    res.id ??
+    res.reservationId ??
+    res.reservation_id ??
+    res.uuid ??
+    res._id ??
+    res.id;
+
+  // planDetailId normalization
+  normalized.planDetailId =
+    res.planDetailId ??
+    res.planDetail?.id ??
+    res.plan_detail_id ??
+    res.planDetailId;
+
+  // type normalization: backend may return 여러 포맷 -> UI에서 기대하는 값으로 맞춤
+  if (res.type) {
+    normalized.type = res.type;
+  } else {
+    // 필드 존재 여부로 타입 추정
+    if (
+      res.startLocation ||
+      res.endLocation ||
+      res.seat ||
+      res.startTime ||
+      res.endTime
+    ) {
+      normalized.type = "TransportReservation";
+    } else if (
+      res.checkInDate ||
+      res.checkOutDate ||
+      res.call ||
+      res.checkInTime ||
+      res.checkOutTime
+    ) {
+      normalized.type = "AccommodationReservation";
+    } else if (
+      res.reservationDate ||
+      res.reservationTime ||
+      (res.address && !res.startLocation)
+    ) {
+      normalized.type = "RestaurantReservation";
+    } else {
+      normalized.type = res.type ?? null;
+    }
+  }
+
+  // 날짜/시간 필드 이름 보정
+  if (!normalized.startTime && (res.startTime || res.start_time))
+    normalized.startTime = res.startTime ?? res.start_time;
+  if (!normalized.endTime && (res.endTime || res.end_time))
+    normalized.endTime = res.endTime ?? res.end_time;
+  if (!normalized.checkInDate && (res.checkInDate || res.check_in_date))
+    normalized.checkInDate = res.checkInDate ?? res.check_in_date;
+  if (!normalized.checkOutDate && (res.checkOutDate || res.check_out_date))
+    normalized.checkOutDate = res.checkOutDate ?? res.check_out_date;
+  if (
+    !normalized.reservationDate &&
+    (res.reservationDate || res.reservation_date)
+  )
+    normalized.reservationDate = res.reservationDate ?? res.reservation_date;
+  if (
+    !normalized.reservationTime &&
+    (res.reservationTime || res.reservation_time)
+  )
+    normalized.reservationTime = res.reservationTime ?? res.reservation_time;
+
+  // place 관련 normalization
+  if (!normalized.address && (res.address || res.place?.address))
+    normalized.address = res.address ?? res.place?.address;
+  if (!normalized.call && (res.call || res.place?.call))
+    normalized.call = res.call ?? res.place?.call;
+  if (!normalized.name && (res.name || res.place?.placeName))
+    normalized.name = res.name ?? res.place?.placeName;
+
+  return normalized;
+};
+
 export default function TravelDetail() {
   const { id } = useParams();
   const location = useLocation();
@@ -306,7 +389,7 @@ export default function TravelDetail() {
       await saveToBackend(merged);
       setEditInfoOpen(false);
       alert("기본 정보가 저장되었습니다.");
-    } catch (err) { }
+    } catch (err) {}
   };
 
   /* ------------------------------
@@ -728,18 +811,18 @@ export default function TravelDetail() {
       const placePayload =
         newPlan.place && typeof newPlan.place === "object"
           ? {
-            placeName: newPlan.place.placeName || "장소명 없음",
-            address: newPlan.place.address || "",
-            call: newPlan.place.call || null,
-            classification: newPlan.place.classification || null,
-            kakaoPlaceId: newPlan.place.kakaoPlaceId || null,
-          }
+              placeName: newPlan.place.placeName || "장소명 없음",
+              address: newPlan.place.address || "",
+              call: newPlan.place.call || null,
+              classification: newPlan.place.classification || null,
+              kakaoPlaceId: newPlan.place.kakaoPlaceId || null,
+            }
           : newPlan.place
-            ? {
+          ? {
               placeName: String(newPlan.place),
               address: "",
             }
-            : null;
+          : null;
 
       const payload = {
         planId: Number(planId),
@@ -795,7 +878,7 @@ export default function TravelDetail() {
     };
     try {
       await updateAndSave(updated);
-    } catch (err) { }
+    } catch (err) {}
   };
 
   const startEditItinerary = (i) => {
@@ -848,7 +931,7 @@ export default function TravelDetail() {
       console.error("Error details:", err.response?.data || err);
       alert(
         "일정 수정 저장에 실패했습니다: " +
-        (err.response?.data?.message || err.message)
+          (err.response?.data?.message || err.message)
       );
     }
   };
@@ -878,25 +961,25 @@ export default function TravelDetail() {
       if (!planDetailId) {
         const placeObj =
           newReservation["주소"] ||
-            newReservation.address ||
-            newReservation["식당 이름"] ||
-            newReservation["숙소 이름"] ||
-            newReservation["출발지"] ||
-            newReservation["도착지"]
+          newReservation.address ||
+          newReservation["식당 이름"] ||
+          newReservation["숙소 이름"] ||
+          newReservation["출발지"] ||
+          newReservation["도착지"]
             ? {
-              placeName:
-                newReservation["식당 이름"] ||
-                newReservation["숙소 이름"] ||
-                newReservation["출발지"] ||
-                newReservation["도착지"] ||
-                null,
-              address:
-                newReservation["주소"] || newReservation.address || null,
-              call:
-                newReservation["전화 번호"] || newReservation["전화"] || null,
-              classification: null,
-              kakaoPlaceId: null,
-            }
+                placeName:
+                  newReservation["식당 이름"] ||
+                  newReservation["숙소 이름"] ||
+                  newReservation["출발지"] ||
+                  newReservation["도착지"] ||
+                  null,
+                address:
+                  newReservation["주소"] || newReservation.address || null,
+                call:
+                  newReservation["전화 번호"] || newReservation["전화"] || null,
+                classification: null,
+                kakaoPlaceId: null,
+              }
             : null;
 
         const placeholder = {
@@ -942,11 +1025,19 @@ export default function TravelDetail() {
         createdReservation = payload;
       }
 
-      // 4) UI용 저장: 서버응답을 그대로 reservations 배열에 추가 (정규화 필요시 추가 변환)
+      // ---------------- 정규화 및 UI 반영 ----------------
+      const normalized = normalizeReservationForUi(createdReservation);
+
       const updated = {
         ...travelData,
-        reservations: [...(travelData.reservations || []), createdReservation],
+        reservations: [...(travelData.reservations || []), normalized],
       };
+
+      // 로컬 상태에 먼저 반영해서 즉시 편집 가능하도록 보장
+      setTravelData(updated);
+      setPlan((p) => ({ ...(p || {}), travelData: updated }));
+
+      // 서버에 plan(travelData)도 저장(옵션)
       await updateAndSave(updated);
 
       setNewReservation({});
@@ -971,26 +1062,36 @@ export default function TravelDetail() {
     };
     try {
       await updateAndSave(updated);
-    } catch (err) { }
+    } catch (err) {}
   };
 
   const startEditReservation = (i) => {
     const reservation = travelData.reservations[i];
 
+    // 정규화 적용
+    const res = normalizeReservationForUi(reservation);
+
     // 예약 타입 설정
     if (
-      reservation.type === "TransportReservation" ||
-      reservation.type === "교통"
+      res.type === "TransportReservation" ||
+      res.type === "교통" ||
+      res.startLocation ||
+      res.endLocation ||
+      res.seat
     ) {
       setReservationType("교통");
     } else if (
-      reservation.type === "AccommodationReservation" ||
-      reservation.type === "숙소"
+      res.type === "AccommodationReservation" ||
+      res.type === "숙소" ||
+      res.checkInDate ||
+      res.checkOutDate
     ) {
       setReservationType("숙소");
     } else if (
-      reservation.type === "RestaurantReservation" ||
-      reservation.type === "음식점"
+      res.type === "RestaurantReservation" ||
+      res.type === "음식점" ||
+      res.reservationDate ||
+      res.reservationTime
     ) {
       setReservationType("음식점");
     }
@@ -998,59 +1099,74 @@ export default function TravelDetail() {
     // 백엔드 응답을 UI 입력 폼 형식으로 변환
     let convertedData = {};
 
-    if (reservation.type === "TransportReservation") {
+    if (res.type === "TransportReservation" || reservationType === "교통") {
       convertedData = {
-        "교통 수단": reservation.name || "",
-        출발지: reservation.startLocation || "",
-        도착지: reservation.endLocation || "",
-        "출발 시간": reservation.startTime
-          ? new Date(reservation.startTime).toTimeString().slice(0, 5)
+        "교통 수단": res.name || "",
+        출발지: res.startLocation || "",
+        도착지: res.endLocation || "",
+        "출발 시간": res.startTime
+          ? new Date(res.startTime).toTimeString().slice(0, 5)
           : "",
-        "도착 시간": reservation.endTime
-          ? new Date(reservation.endTime).toTimeString().slice(0, 5)
+        "도착 시간": res.endTime
+          ? new Date(res.endTime).toTimeString().slice(0, 5)
           : "",
-        좌석: reservation.seat || "",
-        "예약 번호": reservation.reservationNo || "",
-        메모: reservation.memo || "",
+        좌석: res.seat || "",
+        "예약 번호": res.reservationNo || res.reservationNo || "",
+        메모: res.memo || "",
       };
-    } else if (reservation.type === "AccommodationReservation") {
+    } else if (
+      res.type === "AccommodationReservation" ||
+      reservationType === "숙소"
+    ) {
       convertedData = {
-        "숙소 이름": reservation.name || "",
-        주소: reservation.address || "",
-        "체크인 날짜": reservation.checkInDate
-          ? reservation.checkInDate.slice(0, 10)
+        "숙소 이름": res.name || "",
+        주소: res.address || "",
+        "체크인 날짜": res.checkInDate
+          ? res.checkInDate.slice
+            ? res.checkInDate.slice(0, 10)
+            : res.checkInDate
           : "",
-        "체크인 시간": reservation.checkInTime
-          ? new Date(reservation.checkInTime).toTimeString().slice(0, 5)
+        "체크인 시간": res.checkInTime
+          ? new Date(res.checkInTime).toTimeString().slice(0, 5)
           : "",
-        "체크아웃 날짜": reservation.checkOutDate
-          ? reservation.checkOutDate.slice(0, 10)
+        "체크아웃 날짜": res.checkOutDate
+          ? res.checkOutDate.slice
+            ? res.checkOutDate.slice(0, 10)
+            : res.checkOutDate
           : "",
-        "체크아웃 시간": reservation.checkOutTime
-          ? new Date(reservation.checkOutTime).toTimeString().slice(0, 5)
+        "체크아웃 시간": res.checkOutTime
+          ? new Date(res.checkOutTime).toTimeString().slice(0, 5)
           : "",
-        "전화 번호": reservation.call || "",
-        "예약 번호": reservation.reservationNo || "",
-        메모: reservation.memo || "",
+        "전화 번호": res.call || "",
+        "예약 번호": res.reservationNo || "",
+        메모: res.memo || "",
       };
-    } else if (reservation.type === "RestaurantReservation") {
+    } else if (
+      res.type === "RestaurantReservation" ||
+      reservationType === "음식점"
+    ) {
       convertedData = {
-        "식당 이름": reservation.name || "",
-        주소: reservation.address || "",
-        "예약 날짜": reservation.reservationDate
-          ? reservation.reservationDate.slice(0, 10)
+        "식당 이름": res.name || "",
+        주소: res.address || "",
+        "예약 날짜": res.reservationDate
+          ? res.reservationDate.slice
+            ? res.reservationDate.slice(0, 10)
+            : res.reservationDate
           : "",
-        "예약 시간": reservation.reservationTime
-          ? new Date(reservation.reservationTime).toTimeString().slice(0, 5)
+        "예약 시간": res.reservationTime
+          ? new Date(res.reservationTime).toTimeString().slice(0, 5)
           : "",
-        "전화 번호": reservation.call || "",
-        "예약 번호": reservation.reservationNo || "",
-        메모: reservation.memo || "",
+        "전화 번호": res.call || "",
+        "예약 번호": res.reservationNo || "",
+        메모: res.memo || "",
       };
+    } else {
+      // fallback: 모든 원본 필드 복사
+      convertedData = { ...res };
     }
 
     setEditingReservationIndex(i);
-    setEditingReservationData(reservation); // 원본 예약 데이터도 저장
+    setEditingReservationData(res); // 정규화된 원본 저장
     setNewReservation(convertedData); // UI 입력 필드에 로드
     setSelectedMenu("reservations");
   };
@@ -1133,7 +1249,7 @@ export default function TravelDetail() {
       const payload = { ...plan, travelData };
       await saveToBackend(payload);
       alert("저장되었습니다.");
-    } catch (err) { }
+    } catch (err) {}
   };
 
   const handleDeletePlan = async () => {
@@ -1242,8 +1358,9 @@ export default function TravelDetail() {
                       className="w-5 h-5"
                     />
                     <span
-                      className={`${item.checked ? "line-through text-gray-400" : ""
-                        }`}
+                      className={`${
+                        item.checked ? "line-through text-gray-400" : ""
+                      }`}
                     >
                       {item.name}
                     </span>
@@ -1283,9 +1400,9 @@ export default function TravelDetail() {
                       onChange={(e) =>
                         editingItineraryIndex !== null
                           ? setEditingItineraryData({
-                            ...editingItineraryData,
-                            date: e.target.value,
-                          })
+                              ...editingItineraryData,
+                              date: e.target.value,
+                            })
                           : setNewPlan({ ...newPlan, date: e.target.value })
                       }
                       className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
@@ -1304,9 +1421,9 @@ export default function TravelDetail() {
                       onChange={(e) =>
                         editingItineraryIndex !== null
                           ? setEditingItineraryData({
-                            ...editingItineraryData,
-                            time: e.target.value,
-                          })
+                              ...editingItineraryData,
+                              time: e.target.value,
+                            })
                           : setNewPlan({ ...newPlan, time: e.target.value })
                       }
                       className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
@@ -1322,16 +1439,16 @@ export default function TravelDetail() {
                           editingItineraryIndex !== null
                             ? editingItineraryData?.place || ""
                             : // newPlan.place가 객체일 수 있으므로 placeName 또는 문자열 사용
-                            (typeof newPlan.place === "string"
-                              ? newPlan.place
-                              : newPlan.place?.placeName) || ""
+                              (typeof newPlan.place === "string"
+                                ? newPlan.place
+                                : newPlan.place?.placeName) || ""
                         }
                         onChange={(e) =>
                           editingItineraryIndex !== null
                             ? setEditingItineraryData({
-                              ...editingItineraryData,
-                              place: e.target.value,
-                            })
+                                ...editingItineraryData,
+                                place: e.target.value,
+                              })
                             : setNewPlan({ ...newPlan, place: e.target.value })
                         }
                         className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full mr-2"
@@ -1357,9 +1474,9 @@ export default function TravelDetail() {
                       onChange={(e) =>
                         editingItineraryIndex !== null
                           ? setEditingItineraryData({
-                            ...editingItineraryData,
-                            content: e.target.value,
-                          })
+                              ...editingItineraryData,
+                              content: e.target.value,
+                            })
                           : setNewPlan({ ...newPlan, content: e.target.value })
                       }
                       className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
@@ -1473,7 +1590,9 @@ export default function TravelDetail() {
                     const isSearchable =
                       f.includes("주소") ||
                       f.includes("전화") ||
-                      ["출발지", "도착지", "숙소 이름", "식당 이름"].includes(f);
+                      ["출발지", "도착지", "숙소 이름", "식당 이름"].includes(
+                        f
+                      );
                     const currentValue =
                       editingReservationIndex !== null
                         ? newReservation[f] || ""
@@ -1553,15 +1672,15 @@ export default function TravelDetail() {
                     <div className="w-full">
                       <p className="text-xl font-semibold mb-2 text-blue-400">
                         {res.type === "TransportReservation" ||
-                          res.type === "교통"
+                        res.type === "교통"
                           ? "🚌 교통 예약"
                           : ""}
                         {res.type === "AccommodationReservation" ||
-                          res.type === "숙소"
+                        res.type === "숙소"
                           ? "🛏️ 숙소 예약"
                           : ""}
                         {res.type === "RestaurantReservation" ||
-                          res.type === "음식점"
+                        res.type === "음식점"
                           ? "🍽️ 음식점 예약"
                           : ""}
                         {!res.type && "📑 예약 정보"}
@@ -1624,18 +1743,19 @@ export default function TravelDetail() {
           <button
             key={tab}
             onClick={() => setSelectedMenu(tab)}
-            className={`px-6 py-3 transition-colors ${selectedMenu === tab
-              ? "border-b-2 border-blue-500 text-blue-400"
-              : "text-gray-400 hover:text-gray-200"
-              }`}
+            className={`px-6 py-3 transition-colors ${
+              selectedMenu === tab
+                ? "border-b-2 border-blue-500 text-blue-400"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
           >
             {tab === "info"
               ? "여행 정보"
               : tab === "checklist"
-                ? "체크리스트"
-                : tab === "itinerary"
-                  ? "일정"
-                  : "예약 정보"}
+              ? "체크리스트"
+              : tab === "itinerary"
+              ? "일정"
+              : "예약 정보"}
           </button>
         ))}
       </div>

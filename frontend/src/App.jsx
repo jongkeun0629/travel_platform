@@ -15,10 +15,11 @@ import CreatePlan from "./pages/CreatePlan";
 import TravelDetail from "./pages/TravelDetail";
 import ProfilePage from "./pages/ProfilePage";
 import OAuthRedirectHandler from "./pages/OAuthRedirectHandler";
-import TripReviewPage from "./pages/TripReviewPage";       // ★ 추가
-import PlaceReviewPage from "./pages/PlaceReviewPage";     // ★ 추가
+import TripReviewPage from "./pages/TripReviewPage"; // ★ 추가
+import PlaceReviewPage from "./pages/PlaceReviewPage"; // ★ 추가
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
+import PlanPage from "./pages/PlanPage";
 
 function AppLayout() {
   const user = useAuthStore((s) => s.user);
@@ -55,6 +56,7 @@ export default function App() {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/createplan" element={<CreatePlan />} />
               <Route path="/traveldetail/:id" element={<TravelDetail />} />
+              <Route path="/plans" element={<PlanPage />} />
 
               {/* ★ 후기 라우트들 여기 추가 */}
               <Route path="/trip-reviews" element={<TripReviewPage />} />
