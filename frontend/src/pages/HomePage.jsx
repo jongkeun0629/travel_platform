@@ -34,8 +34,9 @@ export default function HomePage() {
     }
   };
 
-  const myPlans = userPlans.filter(
-    (plan) => plan.user.username === user.username
+  // id 기준으로 필터 (plan.user.id 와 현재 로그인 id 비교)
+  const myPlans = (userPlans || []).filter(
+    (plan) => (plan.user?.id ?? plan.user?.userId) === currentUserId
   );
 
   return (

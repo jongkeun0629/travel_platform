@@ -33,6 +33,20 @@ export default function Navbar({ user, onLogout }) {
     setTripOpen(false);
   };
 
+  // 인코딩 깨짐 보정(간단한 Latin1 -> UTF-8 복원 시도)
+  const fixEncoding = (s) => {
+    if (!s || typeof s !== "string") return s;
+    try {
+      // decodeURIComponent(escape(...))은 Latin1로 잘못 해석된 UTF-8 바이트를 복원해 줍니다.
+      return decodeURIComponent(escape(s));
+    } catch (e) {
+      return s;
+    }
+  };
+
+  const rawName = user?.username ?? user?.name ?? user?.email ?? "";
+  const displayName = fixEncoding(rawName);
+
   return (
     <nav className="bg-gray-200 shadow-md w-full sticky top-0 z-50 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,9 +122,7 @@ export default function Navbar({ user, onLogout }) {
           <div className="hidden md:flex items-center space-x-4">
             <span className="text-sm text-gray-700">
               안녕하세요,{" "}
-              <span className="font-semibold text-blue-600">
-                {user.username}
-              </span>
+              <span className="font-semibold text-blue-600">{displayName}</span>
               님
             </span>
             <Link
