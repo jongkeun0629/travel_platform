@@ -1,5 +1,7 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,10 +23,16 @@ public class TripReviewComment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_review_id", nullable = false)
+    @JsonIgnore
     private TripReview tripReview;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({
+            "password", "email", "createdAt", "updatedAt",
+            "profileImageUrl", "provider", "providerId",
+            "userInterests", "hibernateLazyInitializer", "handler"
+    })
     private User user;
 
     @Column(nullable = false, columnDefinition = "TEXT")
