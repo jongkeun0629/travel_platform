@@ -17,7 +17,7 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
     List<Plan> findByUser(User user);
 
     @EntityGraph(attributePaths = {"user"})
-    @Query("SELECT p FROM Plan p ORDER BY p.createdAt DESC")
+    @Query("SELECT p FROM Plan p WHERE p.visibility = '전체 공개' ORDER BY p.createdAt DESC")
     Page<Plan> findAllPlan(Pageable pageable);
 
     @EntityGraph(attributePaths = {"user"})
