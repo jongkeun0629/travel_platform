@@ -2,37 +2,28 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import KakaoMap from "../components/Map/KakaoMap";
 import planService from "../services/plan";
+import useAuthStore from "../store/authStore";
+import usePlanStore from "../store/planStore";
 
 export default function HomePage() {
-  const navigate = useNavigate();
+  const currentUserId = useAuthStore((state) => state.user?.id);
 
-  const [plans, setPlans] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const userPlans = usePlanStore((state) => state.userPlans);
+  const loading = usePlanStore((state) => state.loading);
+  const error = usePlanStore((state) => state.error);
+  const getUserPlans = usePlanStore((state) => state.getUserPlans);
+  const deletePlan = usePlanStore((state) => state.deletePlan);
 
   useEffect(() => {
-    const loadPlans = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const content = await planService.getAllPlans();
-        setPlans(content || []);
-      } catch (e) {
-        console.error("Failed to load plans", e);
-        setError("여행 계획을 불러오는 데 실패했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (currentUserId) {
+      getUserPlans(0, currentUserId);
+    }
+  }, [getUserPlans, currentUserId]);
 
-    loadPlans();
-  }, []);
-
-  const handleDeletePlan = async (id) => {
+  const handleDeletePlan = async (planId) => {
     if (!confirm("정말로 이 여행 계획을 삭제하시겠습니까?")) return;
     try {
-      await api.delete(`/api/plans/${id}`);
-      setPlans((prev) => prev.filter((p) => p.id !== id));
+      await deletePlan(planId);
     } catch (e) {
       console.error("Failed to delete plan", e);
       alert("삭제에 실패했습니다.");
@@ -51,24 +42,21 @@ export default function HomePage() {
           <p className="text-gray-400 text-center py-6">로딩 중...</p>
         ) : error ? (
           <p className="text-red-400 text-center py-6">{error}</p>
-        ) : plans.length === 0 ? (
+        ) : userPlans.length === 0 ? (
           <p className="text-gray-400 text-center py-6">
             아직 여행 계획이 없습니다.
           </p>
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
-            {plans.map((plan) => (
+            {userPlans.map((plan) => (
               <div
-                key={plan.id}
+                key={plan.planId}
                 className="bg-gray-900 p-4 rounded-lg shadow-md hover:shadow-xl transition flex flex-col justify-between"
               >
                 <div>
                   <h4 className="text-2xl font-semibold text-blue-400 mb-2">
                     {plan.title}
                   </h4>
-                  <p className="text-gray-300">
-                    작성자: {plan.user.username || "알 수 없음"}
-                  </p>
                   <p className="text-gray-400">
                     도시: {plan.destination || "미정"}
                   </p>

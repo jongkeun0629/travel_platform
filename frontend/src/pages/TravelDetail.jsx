@@ -8,6 +8,7 @@ import useItemStore from "../store/itemStore";
 import usePlanStore from "../store/planStore";
 import reservationService from "../services/reservation";
 import planDetailService from "../services/planDetail";
+import useAuthStore from "../store/authStore";
 
 // 입력 타입 자동 판단
 const getInputType = (label) => {
@@ -63,6 +64,8 @@ export default function TravelDetail() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const currentUserId = useAuthStore((state) => state.user?.id);
+
   const { createItem, getItem } = useItemStore();
 
   const [plan, setPlan] = useState(null);
@@ -73,6 +76,7 @@ export default function TravelDetail() {
   });
   const [loading, setLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState("info");
+  const isOwner = plan && currentUserId && plan.user?.id === currentUserId;
 
   // 입력용 로컬 상태들
   const [newChecklist, setNewChecklist] = useState("");
@@ -302,7 +306,7 @@ export default function TravelDetail() {
       await saveToBackend(merged);
       setEditInfoOpen(false);
       alert("기본 정보가 저장되었습니다.");
-    } catch (err) {}
+    } catch (err) { }
   };
 
   /* ------------------------------
@@ -724,18 +728,18 @@ export default function TravelDetail() {
       const placePayload =
         newPlan.place && typeof newPlan.place === "object"
           ? {
-              placeName: newPlan.place.placeName || "장소명 없음",
-              address: newPlan.place.address || "",
-              call: newPlan.place.call || null,
-              classification: newPlan.place.classification || null,
-              kakaoPlaceId: newPlan.place.kakaoPlaceId || null,
-            }
+            placeName: newPlan.place.placeName || "장소명 없음",
+            address: newPlan.place.address || "",
+            call: newPlan.place.call || null,
+            classification: newPlan.place.classification || null,
+            kakaoPlaceId: newPlan.place.kakaoPlaceId || null,
+          }
           : newPlan.place
-          ? {
+            ? {
               placeName: String(newPlan.place),
               address: "",
             }
-          : null;
+            : null;
 
       const payload = {
         planId: Number(planId),
@@ -791,7 +795,7 @@ export default function TravelDetail() {
     };
     try {
       await updateAndSave(updated);
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const startEditItinerary = (i) => {
@@ -844,7 +848,7 @@ export default function TravelDetail() {
       console.error("Error details:", err.response?.data || err);
       alert(
         "일정 수정 저장에 실패했습니다: " +
-          (err.response?.data?.message || err.message)
+        (err.response?.data?.message || err.message)
       );
     }
   };
@@ -874,25 +878,25 @@ export default function TravelDetail() {
       if (!planDetailId) {
         const placeObj =
           newReservation["주소"] ||
-          newReservation.address ||
-          newReservation["식당 이름"] ||
-          newReservation["숙소 이름"] ||
-          newReservation["출발지"] ||
-          newReservation["도착지"]
+            newReservation.address ||
+            newReservation["식당 이름"] ||
+            newReservation["숙소 이름"] ||
+            newReservation["출발지"] ||
+            newReservation["도착지"]
             ? {
-                placeName:
-                  newReservation["식당 이름"] ||
-                  newReservation["숙소 이름"] ||
-                  newReservation["출발지"] ||
-                  newReservation["도착지"] ||
-                  null,
-                address:
-                  newReservation["주소"] || newReservation.address || null,
-                call:
-                  newReservation["전화 번호"] || newReservation["전화"] || null,
-                classification: null,
-                kakaoPlaceId: null,
-              }
+              placeName:
+                newReservation["식당 이름"] ||
+                newReservation["숙소 이름"] ||
+                newReservation["출발지"] ||
+                newReservation["도착지"] ||
+                null,
+              address:
+                newReservation["주소"] || newReservation.address || null,
+              call:
+                newReservation["전화 번호"] || newReservation["전화"] || null,
+              classification: null,
+              kakaoPlaceId: null,
+            }
             : null;
 
         const placeholder = {
@@ -967,7 +971,7 @@ export default function TravelDetail() {
     };
     try {
       await updateAndSave(updated);
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const startEditReservation = (i) => {
@@ -1129,7 +1133,7 @@ export default function TravelDetail() {
       const payload = { ...plan, travelData };
       await saveToBackend(payload);
       alert("저장되었습니다.");
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const handleDeletePlan = async () => {
@@ -1174,12 +1178,14 @@ export default function TravelDetail() {
             <p className="mb-2 text-lg">여행 타입: {plan.type}</p>
             <p className="mb-2 text-lg">공개 여부: {plan.visibility}</p>
 
-            <button
-              onClick={() => setEditInfoOpen(true)}
-              className="bg-gray-800 hover:bg-gray-700 mt-4 px-4 py-2 rounded-lg text-lg"
-            >
-              수정
-            </button>
+            {isOwner && (
+              <button
+                onClick={() => setEditInfoOpen(true)}
+                className="bg-gray-800 hover:bg-gray-700 mt-4 px-4 py-2 rounded-lg text-lg"
+              >
+                수정
+              </button>
+            )}
 
             {editInfoOpen && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
@@ -1204,20 +1210,22 @@ export default function TravelDetail() {
           <div>
             <h2 className="text-3xl font-bold mb-4">📋 체크리스트</h2>
 
-            <div className="mb-4 flex gap-2">
-              <input
-                className="bg-gray-800 border border-gray-700 p-2 rounded-lg text-lg w-full"
-                value={newChecklist}
-                onChange={(e) => setNewChecklist(e.target.value)}
-                placeholder="항목 추가 (예: 여권)"
-              />
-              <button
-                onClick={handleAddChecklist}
-                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-lg font-semibold"
-              >
-                +
-              </button>
-            </div>
+            {isOwner && (
+              <div className="mb-4 flex gap-2">
+                <input
+                  className="bg-gray-800 border border-gray-700 p-2 rounded-lg text-lg w-full"
+                  value={newChecklist}
+                  onChange={(e) => setNewChecklist(e.target.value)}
+                  placeholder="항목 추가 (예: 여권)"
+                />
+                <button
+                  onClick={handleAddChecklist}
+                  className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-lg font-semibold"
+                >
+                  +
+                </button>
+              </div>
+            )}
 
             <ul>
               {checklistItems.map((item, index) => (
@@ -1229,23 +1237,25 @@ export default function TravelDetail() {
                     <input
                       type="checkbox"
                       checked={!!item.checked}
-                      onChange={() => handleToggleChecklist(index)}
+                      onChange={() => isOwner && handleToggleChecklist(index)}
+                      disabled={!isOwner}
                       className="w-5 h-5"
                     />
                     <span
-                      className={`${
-                        item.checked ? "line-through text-gray-400" : ""
-                      }`}
+                      className={`${item.checked ? "line-through text-gray-400" : ""
+                        }`}
                     >
                       {item.name}
                     </span>
                   </div>
-                  <button
-                    onClick={() => handleRemoveChecklist(index)}
-                    className="text-red-400 hover:text-red-500 text-xl"
-                  >
-                    ✕
-                  </button>
+                  {isOwner && (
+                    <button
+                      onClick={() => handleRemoveChecklist(index)}
+                      className="text-red-400 hover:text-red-500 text-xl"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -1258,131 +1268,134 @@ export default function TravelDetail() {
           <div>
             <h2 className="text-3xl font-bold mb-6">🗓️ 일정 관리</h2>
 
-            <div className="grid md:grid-cols-4 gap-3 mb-6">
-              <div>
-                <p className="text-gray-300 mb-4">📅 날짜를 선택하세요</p>
-                <input
-                  type="date"
-                  value={
-                    editingItineraryIndex !== null
-                      ? editingItineraryData?.date || ""
-                      : newPlan.date
-                  }
-                  onChange={(e) =>
-                    editingItineraryIndex !== null
-                      ? setEditingItineraryData({
-                          ...editingItineraryData,
-                          date: e.target.value,
-                        })
-                      : setNewPlan({ ...newPlan, date: e.target.value })
-                  }
-                  className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
-                />
-              </div>
-
-              <div>
-                <p className="text-gray-300 mb-4">🕒 시간을 선택하세요</p>
-                <input
-                  type="time"
-                  value={
-                    editingItineraryIndex !== null
-                      ? editingItineraryData?.time || ""
-                      : newPlan.time
-                  }
-                  onChange={(e) =>
-                    editingItineraryIndex !== null
-                      ? setEditingItineraryData({
-                          ...editingItineraryData,
-                          time: e.target.value,
-                        })
-                      : setNewPlan({ ...newPlan, time: e.target.value })
-                  }
-                  className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
-                />
-              </div>
-
-              <div>
-                <p className="text-gray-300 mb-4">📍 장소를 입력하세요</p>
-                <div className="flex">
-                  <input
-                    placeholder="장소"
-                    value={
-                      editingItineraryIndex !== null
-                        ? editingItineraryData?.place || ""
-                        : // newPlan.place가 객체일 수 있으므로 placeName 또는 문자열 사용
-                          (typeof newPlan.place === "string"
-                            ? newPlan.place
-                            : newPlan.place?.placeName) || ""
-                    }
-                    onChange={(e) =>
-                      editingItineraryIndex !== null
-                        ? setEditingItineraryData({
+            {isOwner && (
+              <>
+                <div className="grid md:grid-cols-4 gap-3 mb-6">
+                  <div>
+                    <p className="text-gray-300 mb-4">📅 날짜를 선택하세요</p>
+                    <input
+                      type="date"
+                      value={
+                        editingItineraryIndex !== null
+                          ? editingItineraryData?.date || ""
+                          : newPlan.date
+                      }
+                      onChange={(e) =>
+                        editingItineraryIndex !== null
+                          ? setEditingItineraryData({
                             ...editingItineraryData,
-                            place: e.target.value,
+                            date: e.target.value,
                           })
-                        : setNewPlan({ ...newPlan, place: e.target.value })
-                    }
-                    className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full mr-2"
-                  />
-                  <button
-                    onClick={() => handleOpenModal("place")}
-                    className="bg-blue-600 cursor-pointer hover:bg-blue-700 px-3 py-2 rounded-lg text-white w-20"
-                  >
-                    검색
-                  </button>
+                          : setNewPlan({ ...newPlan, date: e.target.value })
+                      }
+                      className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <p className="text-gray-300 mb-4">🕒 시간을 선택하세요</p>
+                    <input
+                      type="time"
+                      value={
+                        editingItineraryIndex !== null
+                          ? editingItineraryData?.time || ""
+                          : newPlan.time
+                      }
+                      onChange={(e) =>
+                        editingItineraryIndex !== null
+                          ? setEditingItineraryData({
+                            ...editingItineraryData,
+                            time: e.target.value,
+                          })
+                          : setNewPlan({ ...newPlan, time: e.target.value })
+                      }
+                      className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <p className="text-gray-300 mb-4">📍 장소를 입력하세요</p>
+                    <div className="flex">
+                      <input
+                        placeholder="장소"
+                        value={
+                          editingItineraryIndex !== null
+                            ? editingItineraryData?.place || ""
+                            : // newPlan.place가 객체일 수 있으므로 placeName 또는 문자열 사용
+                            (typeof newPlan.place === "string"
+                              ? newPlan.place
+                              : newPlan.place?.placeName) || ""
+                        }
+                        onChange={(e) =>
+                          editingItineraryIndex !== null
+                            ? setEditingItineraryData({
+                              ...editingItineraryData,
+                              place: e.target.value,
+                            })
+                            : setNewPlan({ ...newPlan, place: e.target.value })
+                        }
+                        className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full mr-2"
+                      />
+                      <button
+                        onClick={() => handleOpenModal("place")}
+                        className="bg-blue-600 cursor-pointer hover:bg-blue-700 px-3 py-2 rounded-lg text-white w-20"
+                      >
+                        검색
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-gray-300 mb-4">✏️ 내용을 작성하세요</p>
+                    <input
+                      placeholder="내용"
+                      value={
+                        editingItineraryIndex !== null
+                          ? editingItineraryData?.content || ""
+                          : newPlan.content
+                      }
+                      onChange={(e) =>
+                        editingItineraryIndex !== null
+                          ? setEditingItineraryData({
+                            ...editingItineraryData,
+                            content: e.target.value,
+                          })
+                          : setNewPlan({ ...newPlan, content: e.target.value })
+                      }
+                      className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
+                    />
+                  </div>
                 </div>
-              </div>
-
-              <div>
-                <p className="text-gray-300 mb-4">✏️ 내용을 작성하세요</p>
-                <input
-                  placeholder="내용"
-                  value={
-                    editingItineraryIndex !== null
-                      ? editingItineraryData?.content || ""
-                      : newPlan.content
-                  }
-                  onChange={(e) =>
-                    editingItineraryIndex !== null
-                      ? setEditingItineraryData({
-                          ...editingItineraryData,
-                          content: e.target.value,
-                        })
-                      : setNewPlan({ ...newPlan, content: e.target.value })
-                  }
-                  className="bg-gray-800 border border-gray-700 p-2 rounded-lg w-full"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-center mb-8">
-              {editingItineraryIndex !== null ? (
-                <>
-                  <button
-                    onClick={saveEditItinerary}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mr-3"
-                  >
-                    수정 저장
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditingItineraryIndex(null);
-                      setEditingItineraryData(null);
-                    }}
-                    className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-lg font-semibold"
-                  >
-                    취소
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={handleAddPlan}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold"
-                >
-                  일정 추가
-                </button>
-              )}
-            </div>
+                <div className="flex justify-center mb-8">
+                  {editingItineraryIndex !== null ? (
+                    <>
+                      <button
+                        onClick={saveEditItinerary}
+                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mr-3"
+                      >
+                        수정 저장
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingItineraryIndex(null);
+                          setEditingItineraryData(null);
+                        }}
+                        className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-lg font-semibold"
+                      >
+                        취소
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={handleAddPlan}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold"
+                    >
+                      일정 추가
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
 
             {(travelData.itinerary || []).length === 0 ? (
               <p className="text-gray-400 text-center">아직 일정이 없습니다.</p>
@@ -1406,20 +1419,23 @@ export default function TravelDetail() {
                     )}
                     <p>{p.content}</p>
                   </div>
-                  <div>
-                    <button
-                      onClick={() => startEditItinerary(idx)}
-                      className="mr-5 text-xl"
-                    >
-                      <FaRegEdit />
-                    </button>
-                    <button
-                      onClick={() => handleRemovePlan(idx)}
-                      className="text-red-400 hover:text-red-500 text-xl"
-                    >
-                      ✕
-                    </button>
-                  </div>
+
+                  {isOwner && (
+                    <div>
+                      <button
+                        onClick={() => startEditItinerary(idx)}
+                        className="mr-5 text-xl"
+                      >
+                        <FaRegEdit />
+                      </button>
+                      <button
+                        onClick={() => handleRemovePlan(idx)}
+                        className="text-red-400 hover:text-red-500 text-xl"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -1433,92 +1449,94 @@ export default function TravelDetail() {
           <div>
             <h2 className="text-3xl font-bold mb-4">📑 예약 정보</h2>
 
-            <div className="mb-4">
-              <label className="mr-3 text-lg">유형 선택:</label>
-              <select
-                value={reservationType}
-                onChange={(e) => setReservationType(e.target.value)}
-                className="bg-gray-800 border border-gray-700 p-2 rounded-lg"
-              >
-                <option>교통</option>
-                <option>숙소</option>
-                <option>음식점</option>
-              </select>
-            </div>
+            {isOwner && (
+              <>
+                <div className="mb-4">
+                  <label className="mr-3 text-lg">유형 선택:</label>
+                  <select
+                    value={reservationType}
+                    onChange={(e) => setReservationType(e.target.value)}
+                    className="bg-gray-800 border border-gray-700 p-2 rounded-lg"
+                  >
+                    <option>교통</option>
+                    <option>숙소</option>
+                    <option>음식점</option>
+                  </select>
+                </div>
+                <div className="bg-gray-800 p-4 rounded-lg mb-6">
+                  <p className="text-gray-300 mb-3 text-lg font-medium">
+                    ✏️ {reservationType} 예약 정보를 입력하세요.
+                  </p>
 
-            <div className="bg-gray-800 p-4 rounded-lg mb-6">
-              <p className="text-gray-300 mb-3 text-lg font-medium">
-                ✏️ {reservationType} 예약 정보를 입력하세요.
-              </p>
+                  {fields.map((f) => {
+                    const type = getInputType(f);
+                    const isSearchable =
+                      f.includes("주소") ||
+                      f.includes("전화") ||
+                      ["출발지", "도착지", "숙소 이름", "식당 이름"].includes(f);
+                    const currentValue =
+                      editingReservationIndex !== null
+                        ? newReservation[f] || ""
+                        : newReservation[f] || "";
 
-              {fields.map((f) => {
-                const type = getInputType(f);
-                const isSearchable =
-                  f.includes("주소") ||
-                  f.includes("전화") ||
-                  ["출발지", "도착지", "숙소 이름", "식당 이름"].includes(f);
-                const currentValue =
-                  editingReservationIndex !== null
-                    ? newReservation[f] || ""
-                    : newReservation[f] || "";
-
-                return (
-                  <div key={f} className="flex gap-2 mb-2">
-                    <input
-                      type={type}
-                      placeholder={f}
-                      value={currentValue}
-                      onChange={(e) => {
-                        // ✅ 항상 newReservation을 업데이트
-                        setNewReservation({
-                          ...newReservation,
-                          [f]: e.target.value,
-                        });
-                      }}
-                      className="bg-gray-900 border border-gray-700 p-2 rounded-lg w-full"
-                    />
-                    {isSearchable && (
+                    return (
+                      <div key={f} className="flex gap-2 mb-2">
+                        <input
+                          type={type}
+                          placeholder={f}
+                          value={currentValue}
+                          onChange={(e) => {
+                            // ✅ 항상 newReservation을 업데이트
+                            setNewReservation({
+                              ...newReservation,
+                              [f]: e.target.value,
+                            });
+                          }}
+                          className="bg-gray-900 border border-gray-700 p-2 rounded-lg w-full"
+                        />
+                        {isSearchable && (
+                          <button
+                            onClick={() => handleOpenModal(f)}
+                            className="bg-blue-600 cursor-pointer hover:bg-blue-700 px-3 py-2 rounded-lg text-white w-20"
+                          >
+                            검색
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-center mb-8">
+                  {editingReservationIndex !== null ? (
+                    <>
                       <button
-                        onClick={() => handleOpenModal(f)}
-                        className="bg-blue-600 cursor-pointer hover:bg-blue-700 px-3 py-2 rounded-lg text-white w-20"
+                        onClick={saveEditReservation}
+                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mr-3"
                       >
-                        검색
+                        수정 저장
                       </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="flex justify-center mb-8">
-              {editingReservationIndex !== null ? (
-                <>
-                  <button
-                    onClick={saveEditReservation}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-lg font-semibold mr-3"
-                  >
-                    수정 저장
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditingReservationIndex(null);
-                      setEditingReservationData(null);
-                      setNewReservation({});
-                    }}
-                    className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-lg font-semibold"
-                  >
-                    취소
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={handleAddReservation}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold"
-                >
-                  예약 추가
-                </button>
-              )}
-            </div>
+                      <button
+                        onClick={() => {
+                          setEditingReservationIndex(null);
+                          setEditingReservationData(null);
+                          setNewReservation({});
+                        }}
+                        className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-lg font-semibold"
+                      >
+                        취소
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={handleAddReservation}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-lg font-semibold"
+                    >
+                      예약 추가
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
 
             {(travelData.reservations || []).length === 0 ? (
               <p className="text-gray-400 text-center">
@@ -1535,35 +1553,37 @@ export default function TravelDetail() {
                     <div className="w-full">
                       <p className="text-xl font-semibold mb-2 text-blue-400">
                         {res.type === "TransportReservation" ||
-                        res.type === "교통"
+                          res.type === "교통"
                           ? "🚌 교통 예약"
                           : ""}
                         {res.type === "AccommodationReservation" ||
-                        res.type === "숙소"
+                          res.type === "숙소"
                           ? "🛏️ 숙소 예약"
                           : ""}
                         {res.type === "RestaurantReservation" ||
-                        res.type === "음식점"
+                          res.type === "음식점"
                           ? "🍽️ 음식점 예약"
                           : ""}
                         {!res.type && "📑 예약 정보"}
                       </p>
                       {renderReservationInfo(res)}
                     </div>
-                    <div className="flex items-center ml-4">
-                      <button
-                        onClick={() => startEditReservation(idx)}
-                        className="mr-5 text-xl text-blue-400 hover:text-blue-300"
-                      >
-                        <FaRegEdit />
-                      </button>
-                      <button
-                        onClick={() => handleRemoveReservation(idx)}
-                        className="text-red-400 hover:text-red-500 text-xl"
-                      >
-                        ✕
-                      </button>
-                    </div>
+                    {isOwner && (
+                      <div className="flex items-center ml-4">
+                        <button
+                          onClick={() => startEditReservation(idx)}
+                          className="mr-5 text-xl text-blue-400 hover:text-blue-300"
+                        >
+                          <FaRegEdit />
+                        </button>
+                        <button
+                          onClick={() => handleRemoveReservation(idx)}
+                          className="text-red-400 hover:text-red-500 text-xl"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -1587,12 +1607,15 @@ export default function TravelDetail() {
               홈으로
             </button>
           </Link>
-          <button
-            onClick={handleDeletePlan}
-            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-lg"
-          >
-            삭제
-          </button>
+
+          {isOwner && (
+            <button
+              onClick={handleDeletePlan}
+              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-lg"
+            >
+              삭제
+            </button>
+          )}
         </div>
       </div>
 
@@ -1601,19 +1624,18 @@ export default function TravelDetail() {
           <button
             key={tab}
             onClick={() => setSelectedMenu(tab)}
-            className={`px-6 py-3 transition-colors ${
-              selectedMenu === tab
-                ? "border-b-2 border-blue-500 text-blue-400"
-                : "text-gray-400 hover:text-gray-200"
-            }`}
+            className={`px-6 py-3 transition-colors ${selectedMenu === tab
+              ? "border-b-2 border-blue-500 text-blue-400"
+              : "text-gray-400 hover:text-gray-200"
+              }`}
           >
             {tab === "info"
               ? "여행 정보"
               : tab === "checklist"
-              ? "체크리스트"
-              : tab === "itinerary"
-              ? "일정"
-              : "예약 정보"}
+                ? "체크리스트"
+                : tab === "itinerary"
+                  ? "일정"
+                  : "예약 정보"}
           </button>
         ))}
       </div>
